@@ -32,6 +32,6 @@ export const defaultSkills: Skill[] = [
   },
   { id: 'san_bai_uchi', name: '3倍打ち', cost: 11, effects: [{ type: 'damage', multiplier: 3.0, target: 'single' }] },
   { id: 'nerai_uchi', name: 'ねらい打ち', cost: 16, effects: [{ type: 'damage', multiplier: 1.0, target: 'single', is_nerai: true }] },
-  { id: 'karyoku_age', name: '火力上げ', cost: 10, effects: [{ type: 'temp_change', value: 300 }] },
-  { id: 'hiyashikomi', name: '冷やしこみ', cost: 12, effects: [{ type: 'temp_change', value: -100 }] }
+  { id: 'karyoku_age', name: '火力上げ', cost: 10, effects: [{ type: 'temp_change', value: 350 }] },
+  { id: 'hiyashikomi', name: '冷やしこみ', cost: 12, effects: [{ type: 'temp_change', value: -250 }] }
 ];
