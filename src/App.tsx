@@ -8,7 +8,7 @@ import {
   applyMove,
   getHitIndices
 } from './utils/simulatorEngine';
-import type { ForgeState, CellRange, Move } from './utils/simulatorEngine';
+import type { ForgeState, Move } from './utils/simulatorEngine';
 
 interface FloatingDamage {
   id: string;
@@ -17,28 +17,34 @@ interface FloatingDamage {
   isCrit: boolean;
 }
 
+const parseInputVal = (value: string): number | '' => {
+  if (value === '') return '';
+  const parsed = parseInt(value, 10);
+  return isNaN(parsed) ? '' : parsed;
+};
+
 export default function App() {
   // --- Game Layout Setup ---
   const [boardSize, setBoardSize] = useState<4 | 6 | 8>(6);
   
   // Custom Success Ranges
-  const [successRanges, setSuccessRanges] = useState<CellRange[]>(() => 
+  const [successRanges, setSuccessRanges] = useState<{ min: number | ''; max: number | '' }[]>(() => 
     Array.from({ length: 8 }, () => ({ min: 120, max: 150 }))
   );
   
-  const [requiredCriticalLocks, setRequiredCriticalLocks] = useState<number>(3);
+  const [requiredCriticalLocks, setRequiredCriticalLocks] = useState<number | ''>(3);
   
   // Custom focus capacities
-  const [maxFocus, setMaxFocus] = useState<number>(150);
+  const [maxFocus, setMaxFocus] = useState<number | ''>(150);
   
   // Initial Temperature
-  const [initialTemp, setInitialTemp] = useState<number>(1000);
+  const [initialTemp, setInitialTemp] = useState<number | ''>(1000);
 
   // --- Game State ---
-  const [boardValues, setBoardValues] = useState<number[]>([]);
+  const [boardValues, setBoardValues] = useState<(number | '')[]>([]);
   const [boardLocked, setBoardLocked] = useState<boolean[]>([]);
-  const [currentFocus, setCurrentFocus] = useState<number>(150);
-  const [currentTemp, setCurrentTemp] = useState<number>(1000);
+  const [currentFocus, setCurrentFocus] = useState<number | ''>(150);
+  const [currentTemp, setCurrentTemp] = useState<number | ''>(1000);
   const [actionHistory, setActionHistory] = useState<string[]>([]);
   
   // Active Skill Selection
@@ -64,7 +70,20 @@ export default function App() {
   // Initialize Simulator when presets change
   useEffect(() => {
     resetSimulator();
-  }, [boardSize, initialTemp, maxFocus, successRanges]);
+  }, [boardSize]);
+
+  // Sync currentFocus and currentTemp with initial settings before any actions are taken
+  useEffect(() => {
+    if (actionHistory.length === 0) {
+      setCurrentFocus(maxFocus);
+    }
+  }, [maxFocus, actionHistory.length]);
+
+  useEffect(() => {
+    if (actionHistory.length === 0) {
+      setCurrentTemp(initialTemp);
+    }
+  }, [initialTemp, actionHistory.length]);
 
   // Cleanup Web Worker on unmount
   useEffect(() => {
@@ -79,8 +98,20 @@ export default function App() {
     const size = boardSize;
     setBoardValues(Array.from({ length: size }, () => 0));
     setBoardLocked(Array.from({ length: size }, () => false));
-    setCurrentFocus(maxFocus);
-    setCurrentTemp(initialTemp);
+    
+    let finalMaxFocus = maxFocus;
+    let finalInitialTemp = initialTemp;
+    if (maxFocus === '') {
+      finalMaxFocus = 150;
+      setMaxFocus(150);
+    }
+    if (initialTemp === '') {
+      finalInitialTemp = 1000;
+      setInitialTemp(1000);
+    }
+    
+    setCurrentFocus(finalMaxFocus);
+    setCurrentTemp(finalInitialTemp);
     setActionHistory([]);
     setActiveSkillId(null);
     setFloatingDamages([]);
@@ -91,7 +122,7 @@ export default function App() {
   };
 
   // Helper to change individual success range
-  const handleRangeChange = (index: number, key: 'min' | 'max', val: number) => {
+  const handleRangeChange = (index: number, key: 'min' | 'max', val: number | '') => {
     setSuccessRanges(prev => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [key]: val };
@@ -122,7 +153,7 @@ export default function App() {
   const handleCellInteraction = (targetIndex: number, targetType: 'single' | 'vertical' | 'diagonal' | 'quad' | 'none') => {
     if (!activeSkill) return;
 
-    if (currentFocus < activeSkill.cost) {
+    if ((Number(currentFocus) || 0) < activeSkill.cost) {
       alert("集中力が足りません！");
       return;
     }
@@ -143,10 +174,10 @@ export default function App() {
 
     // Apply simulation
     const stateBefore: ForgeState = {
-      values: boardValues,
+      values: boardValues.map(v => Number(v) || 0),
       locked: boardLocked,
-      focus: currentFocus,
-      temp: currentTemp
+      focus: Number(currentFocus) || 0,
+      temp: Number(currentTemp) || 1000
     };
 
     const move: Move = {
@@ -155,12 +186,17 @@ export default function App() {
       targetIndex
     };
 
-    const stateAfter = applyMove(stateBefore, move, skills, successRanges, randomDamageIdx, critRolls, damageTable);
+    const successRangesClean = successRanges.map(r => ({
+      min: Number(r.min) || 0,
+      max: Number(r.max) || 0
+    }));
+
+    const stateAfter = applyMove(stateBefore, move, skills, successRangesClean, randomDamageIdx, critRolls, damageTable);
 
     // Render damage numbers
     const newFloatingDamages: FloatingDamage[] = [];
     if (damageEffect && damageEffect.multiplier !== undefined) {
-      const damageArray = damageTable[Math.round(Math.max(50, Math.min(2000, currentTemp)) / 50) * 50] || damageTable[50];
+      const damageArray = damageTable[Math.round(Math.max(50, Math.min(2000, Number(currentTemp) || 1000)) / 50) * 50] || damageTable[50];
       const baseDamage = damageArray[randomDamageIdx];
       
       hitCells.forEach((cellIdx, i) => {
@@ -168,8 +204,10 @@ export default function App() {
         const isCrit = critRolls[i];
         let amount = 0;
         
-        if (isCrit && boardValues[cellIdx] <= successRanges[cellIdx].max) {
-          amount = stateAfter.values[cellIdx] - boardValues[cellIdx];
+        const cellVal = Number(boardValues[cellIdx]) || 0;
+        const maxLimit = Number(successRanges[cellIdx]?.max) || 0;
+        if (isCrit && cellVal <= maxLimit) {
+          amount = stateAfter.values[cellIdx] - cellVal;
         } else {
           amount = Math.round(baseDamage * (damageEffect.multiplier ?? 1.0));
         }
@@ -240,15 +278,20 @@ export default function App() {
       }
     };
 
+    const successRangesClean = successRanges.slice(0, boardSize).map(r => ({
+      min: Number(r.min) || 0,
+      max: Number(r.max) || 0
+    }));
+
     solverWorkerRef.current.postMessage({
       state: {
-        values: boardValues,
+        values: boardValues.map(v => Number(v) || 0),
         locked: boardLocked,
-        focus: currentFocus,
-        temp: currentTemp
+        focus: Number(currentFocus) || 0,
+        temp: Number(currentTemp) || 1000
       },
-      ranges: successRanges.slice(0, boardSize),
-      requiredCriticalLocks,
+      ranges: successRangesClean,
+      requiredCriticalLocks: Number(requiredCriticalLocks) || 0,
       skills,
       damageTable
     });
@@ -285,18 +328,23 @@ export default function App() {
     const randomDamageIdx = Math.floor(Math.random() * 7);
 
     const stateBefore: ForgeState = {
-      values: boardValues,
+      values: boardValues.map(v => Number(v) || 0),
       locked: boardLocked,
-      focus: currentFocus,
-      temp: currentTemp
+      focus: Number(currentFocus) || 0,
+      temp: Number(currentTemp) || 1000
     };
 
-    const stateAfter = applyMove(stateBefore, move, skills, successRanges, randomDamageIdx, critRolls, damageTable);
+    const successRangesClean = successRanges.map(r => ({
+      min: Number(r.min) || 0,
+      max: Number(r.max) || 0
+    }));
+
+    const stateAfter = applyMove(stateBefore, move, skills, successRangesClean, randomDamageIdx, critRolls, damageTable);
 
     const newFloatingDamages: FloatingDamage[] = [];
     const damageEffect = skill.effects.find(e => e.type === 'damage');
     if (damageEffect && damageEffect.multiplier !== undefined && move.targetType !== 'none') {
-      const damageArray = damageTable[Math.round(Math.max(50, Math.min(2000, currentTemp)) / 50) * 50] || damageTable[50];
+      const damageArray = damageTable[Math.round(Math.max(50, Math.min(2000, Number(currentTemp) || 1000)) / 50) * 50] || damageTable[50];
       const baseDamage = damageArray[randomDamageIdx];
       
       hitCells.forEach((cellIdx, i) => {
@@ -304,8 +352,10 @@ export default function App() {
         const isCrit = critRolls[i];
         let amount = 0;
         
-        if (isCrit && boardValues[cellIdx] <= successRanges[cellIdx].max) {
-          amount = stateAfter.values[cellIdx] - boardValues[cellIdx];
+        const cellVal = Number(boardValues[cellIdx]) || 0;
+        const maxLimit = Number(successRanges[cellIdx]?.max) || 0;
+        if (isCrit && cellVal <= maxLimit) {
+          amount = stateAfter.values[cellIdx] - cellVal;
         } else {
           amount = Math.round(baseDamage * (damageEffect.multiplier ?? 1.0));
         }
@@ -366,10 +416,20 @@ export default function App() {
   };
 
   // Evaluate final status for UI
+  const successRangesClean = successRanges.slice(0, boardSize).map(r => ({
+    min: Number(r.min) || 0,
+    max: Number(r.max) || 0
+  }));
+
   const forgeStatus = evaluateForgeStatus(
-    { values: boardValues, locked: boardLocked, focus: currentFocus, temp: currentTemp },
-    successRanges.slice(0, boardSize),
-    requiredCriticalLocks
+    {
+      values: boardValues.map(v => Number(v) || 0),
+      locked: boardLocked,
+      focus: Number(currentFocus) || 0,
+      temp: Number(currentTemp) || 1000
+    },
+    successRangesClean,
+    Number(requiredCriticalLocks) || 0
   );
 
   return (
@@ -434,7 +494,7 @@ export default function App() {
                   <input
                     type="number"
                     value={maxFocus}
-                    onChange={(e) => setMaxFocus(Math.max(10, parseInt(e.target.value) || 0))}
+                    onChange={(e) => setMaxFocus(parseInputVal(e.target.value))}
                     className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 mt-1 text-white font-mono text-sm focus:outline-none focus:border-indigo-500"
                   />
                 </div>
@@ -444,7 +504,7 @@ export default function App() {
                     type="number"
                     step="50"
                     value={initialTemp}
-                    onChange={(e) => setInitialTemp(Math.max(50, Math.min(2000, parseInt(e.target.value) || 0)))}
+                    onChange={(e) => setInitialTemp(parseInputVal(e.target.value))}
                     className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 mt-1 text-white font-mono text-sm focus:outline-none focus:border-indigo-500"
                   />
                 </div>
@@ -458,7 +518,7 @@ export default function App() {
                   min="0"
                   max={boardSize}
                   value={requiredCriticalLocks}
-                  onChange={(e) => setRequiredCriticalLocks(Math.max(0, Math.min(boardSize, parseInt(e.target.value) || 0)))}
+                  onChange={(e) => setRequiredCriticalLocks(parseInputVal(e.target.value))}
                   className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 mt-1 text-white font-mono text-sm focus:outline-none focus:border-indigo-500"
                 />
               </div>
@@ -475,15 +535,15 @@ export default function App() {
                   <div className="flex items-center space-x-2">
                     <input
                       type="number"
-                      value={successRanges[idx]?.min || 120}
-                      onChange={(e) => handleRangeChange(idx, 'min', parseInt(e.target.value) || 0)}
+                      value={successRanges[idx]?.min}
+                      onChange={(e) => handleRangeChange(idx, 'min', parseInputVal(e.target.value))}
                       className="w-16 bg-slate-950 border border-slate-850 rounded py-1 px-1.5 text-center text-white font-mono text-xs"
                     />
                     <span className="text-slate-600">-</span>
                     <input
                       type="number"
-                      value={successRanges[idx]?.max || 150}
-                      onChange={(e) => handleRangeChange(idx, 'max', parseInt(e.target.value) || 0)}
+                      value={successRanges[idx]?.max}
+                      onChange={(e) => handleRangeChange(idx, 'max', parseInputVal(e.target.value))}
                       className="w-16 bg-slate-950 border border-slate-850 rounded py-1 px-1.5 text-center text-white font-mono text-xs"
                     />
                   </div>
@@ -547,12 +607,12 @@ export default function App() {
                 <div className="mt-1 flex items-center justify-center space-x-2">
                   {/* Glowing flame point */}
                   <span className={`h-2.5 w-2.5 rounded-full inline-block animate-ping ${
-                    currentTemp >= 1500 ? 'bg-red-500' : currentTemp >= 900 ? 'bg-orange-400' : 'bg-sky-400'
+                    (Number(currentTemp) || 1000) >= 1500 ? 'bg-red-500' : (Number(currentTemp) || 1000) >= 900 ? 'bg-orange-400' : 'bg-sky-400'
                   }`} />
                   <span className={`text-2xl font-bold font-mono ${
-                    currentTemp >= 1500 ? 'text-red-500 text-glow-red' : currentTemp >= 900 ? 'text-orange-400 text-glow-yellow' : 'text-sky-400 text-glow-blue'
+                    (Number(currentTemp) || 1000) >= 1500 ? 'text-red-500 text-glow-red' : (Number(currentTemp) || 1000) >= 900 ? 'text-orange-400 text-glow-yellow' : 'text-sky-400 text-glow-blue'
                   }`}>
-                    {currentTemp}℃
+                    {currentTemp === '' ? '-' : currentTemp}℃
                   </span>
                 </div>
               </div>
@@ -566,7 +626,7 @@ export default function App() {
                     min="0"
                     max={maxFocus}
                     value={currentFocus}
-                    onChange={(e) => setCurrentFocus(Math.max(0, parseInt(e.target.value) || 0))}
+                    onChange={(e) => setCurrentFocus(parseInputVal(e.target.value))}
                     className="w-16 bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-center text-white font-mono text-lg focus:outline-none focus:border-indigo-500"
                   />
                   <span className="text-xs text-slate-500">/ {maxFocus}</span>
@@ -575,7 +635,7 @@ export default function App() {
                 <div className="w-full bg-slate-900 h-1.5 rounded-full mt-2 overflow-hidden border border-slate-800">
                   <div 
                     className="bg-gradient-to-r from-violet-600 to-indigo-500 h-full rounded-full transition-all duration-300"
-                    style={{ width: `${Math.max(0, Math.min(100, (currentFocus / maxFocus) * 100))}%` }}
+                    style={{ width: `${Math.max(0, Math.min(100, ((Number(currentFocus) || 0) / (Number(maxFocus) || 1)) * 100))}%` }}
                   />
                 </div>
               </div>
@@ -631,11 +691,11 @@ export default function App() {
                   borderClass = 'border-blue-500 bg-blue-950/35 shadow-lg shadow-blue-500/10 text-glow-blue';
                   textGlow = 'text-glow-blue text-blue-400';
                   statusLabel = '会心ロック';
-                } else if (value > range.max) {
+                } else if (value > (Number(range.max) || 0)) {
                   borderClass = 'border-red-500 bg-red-950/30 shadow-lg shadow-red-500/10 text-glow-red';
                   textGlow = 'text-glow-red text-red-400';
                   statusLabel = 'オーバー';
-                } else if (value >= range.min && value <= range.max) {
+                } else if (value >= (Number(range.min) || 0) && value <= (Number(range.max) || 0)) {
                   borderClass = 'border-emerald-500 bg-emerald-950/30 shadow-lg shadow-emerald-500/10 text-glow-green';
                   textGlow = 'text-glow-green text-emerald-400';
                   statusLabel = '成功ゾーン内';
@@ -723,7 +783,8 @@ export default function App() {
                         max="999"
                         value={value}
                         onChange={(e) => {
-                          const newVal = Math.max(0, Math.min(999, parseInt(e.target.value) || 0));
+                          const val = parseInputVal(e.target.value);
+                          const newVal = val === '' ? '' : Math.max(0, Math.min(999, val));
                           setBoardValues(prev => {
                             const next = [...prev];
                             next[idx] = newVal;
@@ -743,16 +804,16 @@ export default function App() {
                       <div 
                         className="absolute h-full bg-emerald-500/15 border-l border-r border-emerald-500/30"
                         style={{
-                          left: `${(range.min / 300) * 100}%`,
-                          width: `${((range.max - range.min) / 300) * 100}%`
+                          left: `${((Number(range.min) || 0) / 300) * 100}%`,
+                          width: `${(((Number(range.max) || 0) - (Number(range.min) || 0)) / 300) * 100}%`
                         }}
                       />
                       {/* Current Value pointer */}
                       <div 
                         className={`absolute top-0 h-full rounded-full transition-all duration-300 ${
-                          isLocked ? 'bg-blue-400 shadow shadow-blue-500' : value > range.max ? 'bg-red-500' : value >= range.min ? 'bg-emerald-400' : 'bg-amber-500'
+                          isLocked ? 'bg-blue-400 shadow shadow-blue-500' : (Number(value) || 0) > (Number(range.max) || 0) ? 'bg-red-500' : (Number(value) || 0) >= (Number(range.min) || 0) ? 'bg-emerald-400' : 'bg-amber-500'
                         }`}
-                        style={{ width: `${Math.min(100, (value / 300) * 100)}%` }}
+                        style={{ width: `${Math.min(100, ((Number(value) || 0) / 300) * 100)}%` }}
                       />
                     </div>
 
@@ -824,7 +885,7 @@ export default function App() {
             <div className="grid grid-cols-2 gap-2">
               {skills.map(skill => {
                 const isSelected = activeSkillId === skill.id;
-                const canAfford = currentFocus >= skill.cost;
+                const canAfford = (Number(currentFocus) || 0) >= skill.cost;
                 const isFinished = forgeStatus !== 'ongoing';
 
                 return (
