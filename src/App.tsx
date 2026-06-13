@@ -560,8 +560,16 @@ export default function App() {
               {/* Focus/Concentration Bar */}
               <div className="bg-slate-950/40 p-3 rounded-lg border border-slate-850">
                 <span className="text-xs font-semibold text-slate-400 uppercase">残り集中力</span>
-                <div className="text-2xl font-bold font-mono text-white mt-1">
-                  {currentFocus} <span className="text-xs text-slate-500">/ {maxFocus}</span>
+                <div className="flex items-center justify-center space-x-1 mt-1">
+                  <input
+                    type="number"
+                    min="0"
+                    max={maxFocus}
+                    value={currentFocus}
+                    onChange={(e) => setCurrentFocus(Math.max(0, parseInt(e.target.value) || 0))}
+                    className="w-16 bg-slate-900 border border-slate-800 rounded px-1.5 py-0.5 text-center text-white font-mono text-lg focus:outline-none focus:border-indigo-500"
+                  />
+                  <span className="text-xs text-slate-500">/ {maxFocus}</span>
                 </div>
                 {/* Bar */}
                 <div className="w-full bg-slate-900 h-1.5 rounded-full mt-2 overflow-hidden border border-slate-800">
@@ -708,11 +716,23 @@ export default function App() {
                     </div>
 
                     {/* Numeric Progress */}
-                    <div className="my-4">
-                      <div className={`text-3xl md:text-4xl font-extrabold font-mono text-white tracking-tight ${textGlow}`}>
-                        {value}
-                      </div>
-                      <div className="text-[11px] text-slate-500 mt-1 font-semibold">
+                    <div className="my-4" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="number"
+                        min="0"
+                        max="999"
+                        value={value}
+                        onChange={(e) => {
+                          const newVal = Math.max(0, Math.min(999, parseInt(e.target.value) || 0));
+                          setBoardValues(prev => {
+                            const next = [...prev];
+                            next[idx] = newVal;
+                            return next;
+                          });
+                        }}
+                        className={`text-3xl md:text-4xl font-extrabold font-mono text-white tracking-tight text-center w-24 bg-slate-900/40 border-b border-dashed border-slate-700 focus:outline-none focus:border-indigo-500 rounded px-1 ${textGlow}`}
+                      />
+                      <div className="text-[11px] text-slate-500 mt-1.5 font-semibold">
                         目標: {range.min} - {range.max}
                       </div>
                     </div>
@@ -736,14 +756,31 @@ export default function App() {
                       />
                     </div>
 
-                    {/* Lock Icon */}
-                    {isLocked && (
-                      <div className="absolute top-2 right-2 bg-blue-500 text-slate-950 p-1 rounded-full shadow">
-                        <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                    {/* Lock Toggle Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setBoardLocked(prev => {
+                          const next = [...prev];
+                          next[idx] = !next[idx];
+                          return next;
+                        });
+                      }}
+                      title={isLocked ? "会心ロック解除" : "会心ロック設定"}
+                      className={`absolute top-2 right-2 p-1 rounded-full shadow transition-all duration-150 cursor-pointer ${
+                        isLocked 
+                          ? 'bg-blue-500 text-slate-950 hover:bg-blue-400' 
+                          : 'bg-slate-900/60 text-slate-500 hover:text-slate-350 border border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                        {isLocked ? (
                           <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
-                        </svg>
-                      </div>
-                    )}
+                        ) : (
+                          <path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6-5c1.66 0 3 1.34 3 3v2H9V6c0-1.66 1.34-3 3-3zm6 15H6V10h12v8z"/>
+                        )}
+                      </svg>
+                    </button>
                   </div>
                 );
               })}
