@@ -101,7 +101,7 @@ export default function App() {
 
   // UI helpers for Layout Columns
   const getColCount = () => {
-    return boardSize === 4 ? 2 : boardSize === 6 ? 3 : 4;
+    return 2;
   };
 
   const activeSkill = skills.find(s => s.id === activeSkillId);
@@ -258,31 +258,14 @@ export default function App() {
   const getMoveTargetLabel = (type: string, index: number) => {
     if (type === 'none') return "全体";
     if (type === 'single') return `マス ${index}`;
-    
-    if (boardSize === 4) {
-      if (type === 'vertical') return index === 0 ? "左列 (0, 2)" : "右列 (1, 3)";
-      if (type === 'diagonal') return "ななめ (1, 2)";
-      if (type === 'quad') return "4連 (全マス)";
-    } else if (boardSize === 6) {
-      if (type === 'vertical') {
-        return index === 0 ? "左列 (0, 3)" : index === 1 ? "中列 (1, 4)" : "右列 (2, 5)";
-      }
-      if (type === 'diagonal') {
-        return index === 0 ? "左ななめ (1, 3)" : "右ななめ (2, 4)";
-      }
-      if (type === 'quad') {
-        return index === 0 ? "左4連 (0,1,3,4)" : "右4連 (1,2,4,5)";
-      }
-    } else {
-      if (type === 'vertical') {
-        return index === 0 ? "1列目 (0, 4)" : index === 1 ? "2列目 (1, 5)" : index === 2 ? "3列目 (2, 6)" : "4列目 (3, 7)";
-      }
-      if (type === 'diagonal') {
-        return `ななめ (右上-左下) 列${index+1}-${index+2}`;
-      }
-      if (type === 'quad') {
-        return `4連 列${index+1}-${index+2}`;
-      }
+    if (type === 'vertical') {
+      return `縦 (マス ${index} & ${index + 2})`;
+    }
+    if (type === 'diagonal') {
+      return `ななめ (マス ${index + 1} & ${index + 2})`;
+    }
+    if (type === 'quad') {
+      return `4連 (マス ${index}, ${index + 1}, ${index + 2}, ${index + 3})`;
     }
     return `ターゲット ${index}`;
   };
@@ -672,19 +655,11 @@ export default function App() {
                     if (isLocked) return;
                     handleCellInteraction(idx, 'single');
                   } else if (targetType === 'vertical') {
-                    // column index
-                    const col = idx % getColCount();
-                    handleCellInteraction(col, 'vertical');
-                  } else if (targetType === 'diagonal') {
-                    // subgrid col: click hits subgrid starting col. If width is W, we can determine the starting column
-                    const col = idx % getColCount();
-                    // snap to starting column within bound
-                    const startCol = Math.min(col, getColCount() - 2);
-                    handleCellInteraction(startCol, 'diagonal');
-                  } else if (targetType === 'quad') {
-                    const col = idx % getColCount();
-                    const startCol = Math.min(col, getColCount() - 2);
-                    handleCellInteraction(startCol, 'quad');
+                    const startIdx = idx < boardSize - 2 ? idx : idx - 2;
+                    handleCellInteraction(startIdx, 'vertical');
+                  } else if (targetType === 'diagonal' || targetType === 'quad') {
+                    const startIdx = Math.min(Math.floor(idx / 2), boardSize / 2 - 2) * 2;
+                    handleCellInteraction(startIdx, targetType);
                   }
                 };
 
@@ -693,10 +668,12 @@ export default function App() {
                   const targetType = activeSkill.effects.find(e => e.type === 'damage')?.target || 'single';
                   if (targetType === 'single') {
                     setHoveredTargetIndex(idx);
+                  } else if (targetType === 'vertical') {
+                    const startIdx = idx < boardSize - 2 ? idx : idx - 2;
+                    setHoveredTargetIndex(startIdx);
                   } else {
-                    const col = idx % getColCount();
-                    const startCol = targetType === 'vertical' ? col : Math.min(col, getColCount() - 2);
-                    setHoveredTargetIndex(startCol);
+                    const startIdx = Math.min(Math.floor(idx / 2), boardSize / 2 - 2) * 2;
+                    setHoveredTargetIndex(startIdx);
                   }
                 };
 

@@ -22,7 +22,8 @@ export interface Move {
 
 // Check if a state is failed (any cell value has exceeded max success range)
 export function isFailedState(state: ForgeState, ranges: CellRange[]): boolean {
-  for (let i = 0; i < state.values.length; i++) {
+  const len = Math.min(state.values.length, ranges.length);
+  for (let i = 0; i < len; i++) {
     if (state.values[i] > ranges[i].max) {
       return true; // Exceeded limit, failed!
     }
@@ -32,7 +33,8 @@ export function isFailedState(state: ForgeState, ranges: CellRange[]): boolean {
 
 // Check if all cells are within success ranges
 export function isSuccessState(state: ForgeState, ranges: CellRange[]): boolean {
-  for (let i = 0; i < state.values.length; i++) {
+  const len = Math.min(state.values.length, ranges.length);
+  for (let i = 0; i < len; i++) {
     const val = state.values[i];
     if (val < ranges[i].min || val > ranges[i].max) {
       return false;
@@ -87,7 +89,8 @@ export function evaluateStateScore(state: ForgeState, ranges: CellRange[]): numb
   let criticalLockCount = 0;
   let devOffsetSum = 0;
 
-  for (let i = 0; i < state.values.length; i++) {
+  const len = Math.min(state.values.length, ranges.length);
+  for (let i = 0; i < len; i++) {
     const val = state.values[i];
     const r = ranges[i];
     const center = (r.min + r.max) / 2;
@@ -108,37 +111,34 @@ export function evaluateStateScore(state: ForgeState, ranges: CellRange[]): numb
   return (successCellsCount * 100) + (criticalLockCount * 50) - devOffsetSum;
 }
 
-// Translate grid target to specific hit cell indices
+// Translate grid target to specific hit cell indices (always 2 columns)
 export function getHitIndices(
   targetType: 'single' | 'vertical' | 'diagonal' | 'quad' | 'none',
   targetIndex: number,
-  boardSize: number
+  _boardSize: number
 ): number[] {
-  const width = boardSize === 4 ? 2 : boardSize === 6 ? 3 : 4; // width for 4, 6, 8 layouts
-  
   if (targetType === 'single') {
     return [targetIndex];
   }
   if (targetType === 'vertical') {
-    // Column index
-    return [targetIndex, targetIndex + width];
+    // targetIndex is the top cell of the vertical pair
+    return [targetIndex, targetIndex + 2];
   }
   if (targetType === 'diagonal') {
-    // 2x2 subgrid starting column
-    return [targetIndex + 1, targetIndex + width];
+    // targetIndex is the top-left cell of the 2x2 subgrid
+    return [targetIndex + 1, targetIndex + 2];
   }
   if (targetType === 'quad') {
-    // 2x2 subgrid starting column
-    return [targetIndex, targetIndex + 1, targetIndex + width, targetIndex + width + 1];
+    // targetIndex is the top-left cell of the 2x2 subgrid
+    return [targetIndex, targetIndex + 1, targetIndex + 2, targetIndex + 3];
   }
   return [];
 }
 
-// Generate all possible valid moves from a given state
+// Generate all possible valid moves from a given state (2-column layout)
 export function getPossibleMoves(state: ForgeState, skills: Skill[]): Move[] {
   const moves: Move[] = [];
   const boardSize = state.values.length;
-  const width = boardSize === 4 ? 2 : boardSize === 6 ? 3 : 4;
 
   for (const skill of skills) {
     // Exclude if not enough focus
@@ -163,21 +163,21 @@ export function getPossibleMoves(state: ForgeState, skills: Skill[]): Move[] {
           }
         }
       } else if (targetType === 'vertical') {
-        // Any column where at least one cell is not locked
-        for (let col = 0; col < width; col++) {
-          const locked1 = state.locked[col];
-          const locked2 = state.locked[col + width];
+        // Can start at any cell except the bottom row (which is indices boardSize-2 and boardSize-1)
+        for (let i = 0; i < boardSize - 2; i++) {
+          const locked1 = state.locked[i];
+          const locked2 = state.locked[i + 2];
           if (!locked1 || !locked2) {
-            moves.push({ skillId: skill.id, targetType: 'vertical', targetIndex: col });
+            moves.push({ skillId: skill.id, targetType: 'vertical', targetIndex: i });
           }
         }
       } else if (targetType === 'diagonal' || targetType === 'quad') {
-        // Any 2x2 subgrid starting column (0 to width - 2)
-        for (let col = 0; col < width - 1; col++) {
-          const cells = getHitIndices(targetType, col, boardSize);
+        // Can start at any even index that has a 2x2 space below it (even indices < boardSize - 2)
+        for (let i = 0; i < boardSize - 2; i += 2) {
+          const cells = getHitIndices(targetType, i, boardSize);
           const anyUnlocked = cells.some(idx => !state.locked[idx]);
           if (anyUnlocked) {
-            moves.push({ skillId: skill.id, targetType, targetIndex: col });
+            moves.push({ skillId: skill.id, targetType, targetIndex: i });
           }
         }
       }
