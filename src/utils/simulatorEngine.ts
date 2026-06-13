@@ -187,6 +187,12 @@ export function getPossibleMoves(state: ForgeState, skills: Skill[]): Move[] {
   return moves;
 }
 
+function getDistanceToRange(val: number, min: number, max: number): number {
+  if (val < min) return min - val;
+  if (val > max) return val - max;
+  return 0;
+}
+
 // Apply a single state transition given randomized choices (damageIndex: 0-6, critical rolls per hit cell)
 // This is used for simulation/Monte Carlo rollouts
 export function applyMove(
@@ -226,20 +232,38 @@ export function applyMove(
         }
 
         const isCrit = criticalRolls[i];
-        const minVal = ranges[cellIdx].min;
-        const maxVal = ranges[cellIdx].max;
-        const currentVal = nextState.values[cellIdx];
+        const minVal = Number(ranges[cellIdx]?.min) || 0;
+        const maxVal = Number(ranges[cellIdx]?.max) || 0;
+        const currentVal = Number(nextState.values[cellIdx]) || 0;
 
-        if (isCrit && currentVal <= maxVal) {
-          // Critical hit: landing exactly in [Math.max(minVal, currentVal), maxVal] success range
-          const targetMin = Math.max(minVal, currentVal);
-          const newTargetVal = Math.floor(Math.random() * (maxVal - targetMin + 1)) + targetMin;
+        if (isCrit) {
+          // Critical hit: select the damage value from the predicted damage options (possibleDamages)
+          // that gets the closest to the success range (minimizes distance).
+          const multiplier = effect.multiplier ?? 1.0;
+          const possibleDamages = damageArray.map(base => Math.round(base * multiplier));
+          
+          const distances = possibleDamages.map(d => getDistanceToRange(currentVal + d, minVal, maxVal));
+          const minDistance = Math.min(...distances);
+          
+          const candidates: number[] = [];
+          distances.forEach((dist, idx) => {
+            if (dist === minDistance) {
+              candidates.push(possibleDamages[idx]);
+            }
+          });
+          
+          const chosenDamage = candidates[Math.floor(Math.random() * candidates.length)];
+          const newTargetVal = Math.min(999, currentVal + chosenDamage);
+          
           nextState.values[cellIdx] = newTargetVal;
-          nextState.locked[cellIdx] = true;
+          // Locks if and only if it lands inside the success range
+          if (newTargetVal >= minVal && newTargetVal <= maxVal) {
+            nextState.locked[cellIdx] = true;
+          }
         } else {
           // Normal hit
           const damage = Math.round(baseDamage * (effect.multiplier ?? 1.0));
-          nextState.values[cellIdx] = Math.min(999, nextState.values[cellIdx] + damage);
+          nextState.values[cellIdx] = Math.min(999, currentVal + damage);
         }
       });
     }

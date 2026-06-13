@@ -50,6 +50,9 @@ export default function App() {
   // Active Skill Selection
   const [activeSkillId, setActiveSkillId] = useState<string | null>(null);
 
+  // Unlocked / enabled skills list (true = unlocked/active, false = locked/disabled)
+  const [unlockedSkills, setUnlockedSkills] = useState<Record<string, boolean>>({});
+
   // Floating damage values
   const [floatingDamages, setFloatingDamages] = useState<FloatingDamage[]>([]);
 
@@ -292,7 +295,7 @@ export default function App() {
       },
       ranges: successRangesClean,
       requiredCriticalLocks: Number(requiredCriticalLocks) || 0,
-      skills,
+      skills: skills.filter(s => unlockedSkills[s.id] !== false),
       damageTable
     });
   };
@@ -885,27 +888,58 @@ export default function App() {
             <div className="grid grid-cols-2 gap-2">
               {skills.map(skill => {
                 const isSelected = activeSkillId === skill.id;
+                const isSkillLocked = unlockedSkills[skill.id] === false;
                 const canAfford = (Number(currentFocus) || 0) >= skill.cost;
                 const isFinished = forgeStatus !== 'ongoing';
 
                 return (
-                  <button
-                    key={skill.id}
-                    disabled={!canAfford || isFinished}
-                    onClick={() => setActiveSkillId(isSelected ? null : skill.id)}
-                    className={`p-2.5 rounded-lg flex flex-col justify-between text-left transition-all border ${
-                      isSelected 
-                        ? 'bg-amber-500 text-slate-950 border-amber-300 font-bold shadow-lg shadow-amber-500/15'
-                        : !canAfford || isFinished
-                          ? 'bg-slate-950 border-slate-950 text-slate-700 opacity-40 cursor-not-allowed'
-                          : 'bg-slate-900 border-slate-800 hover:border-slate-750 text-slate-200'
-                    }`}
-                  >
-                    <span className="text-sm font-semibold truncate">{skill.name}</span>
-                    <span className={`text-[10px] mt-1 inline-block font-mono ${isSelected ? 'text-slate-900' : 'text-indigo-400'}`}>
-                      消費: {skill.cost} FP
-                    </span>
-                  </button>
+                  <div key={skill.id} className="relative group">
+                    <button
+                      disabled={isSkillLocked || !canAfford || isFinished}
+                      onClick={() => setActiveSkillId(isSelected ? null : skill.id)}
+                      className={`w-full p-2.5 pr-8 rounded-lg flex flex-col justify-between text-left transition-all border h-full ${
+                        isSkillLocked
+                          ? 'bg-slate-950/80 border-slate-900 text-slate-600 opacity-50'
+                          : isSelected 
+                            ? 'bg-amber-500 text-slate-950 border-amber-300 font-bold shadow-lg shadow-amber-500/15'
+                            : !canAfford || isFinished
+                              ? 'bg-slate-950 border-slate-950 text-slate-700 opacity-40 cursor-not-allowed'
+                              : 'bg-slate-900 border-slate-800 hover:border-slate-750 text-slate-200'
+                      }`}
+                    >
+                      <span className={`text-sm font-semibold truncate ${isSkillLocked ? 'line-through' : ''}`}>{skill.name}</span>
+                      <span className={`text-[10px] mt-1 inline-block font-mono ${isSkillLocked ? 'text-slate-750' : isSelected ? 'text-slate-900' : 'text-indigo-400'}`}>
+                        消費: {skill.cost} FP
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setUnlockedSkills(prev => ({
+                          ...prev,
+                          [skill.id]: isSkillLocked
+                        }));
+                        if (!isSkillLocked && isSelected) {
+                          setActiveSkillId(null);
+                        }
+                      }}
+                      title={isSkillLocked ? "特技を開放する (有効化)" : "特技をロックする (AI計算から除外)"}
+                      className={`absolute top-2.5 right-2.5 p-1 rounded hover:bg-slate-800 transition-all duration-150 cursor-pointer ${
+                        isSkillLocked ? 'text-red-500' : 'text-slate-500 hover:text-indigo-400 opacity-40 group-hover:opacity-100'
+                      }`}
+                    >
+                      {isSkillLocked ? (
+                        <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                          <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                        </svg>
+                      ) : (
+                        <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                          <path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6-5c1.66 0 3 1.34 3 3v2H9V6c0-1.66 1.34-3 3-3zm6 15H6V10h12v8z"/>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 );
               })}
             </div>
