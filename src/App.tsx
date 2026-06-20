@@ -826,22 +826,22 @@ export default function App() {
                       const start = cell.index < 6 ? cell.index : cell.index - 2;
                       const c1 = forgeState.cells[start];
                       const c2 = forgeState.cells[start + 2];
-                      isInteractable = !!(c1?.isActive && c2?.isActive);
+                      isInteractable = !!(c1?.isActive || c2?.isActive);
                     } else if (activeSkill.targetPattern === 'horizontal') {
                       const start = Math.min(Math.floor(cell.index / 2), 3) * 2;
                       const c1 = forgeState.cells[start];
                       const c2 = forgeState.cells[start + 1];
-                      isInteractable = !!(c1?.isActive && c2?.isActive);
+                      isInteractable = !!(c1?.isActive || c2?.isActive);
                     } else if (activeSkill.targetPattern === 'diagonal') {
                       const start = Math.min(Math.floor(cell.index / 2), 2) * 2;
                       const c1 = forgeState.cells[start + 1];
                       const c2 = forgeState.cells[start + 2];
-                      isInteractable = !!(c1?.isActive && c2?.isActive);
+                      isInteractable = !!(c1?.isActive || c2?.isActive);
                     } else if (activeSkill.targetPattern === 'quad') {
                       const start = Math.min(Math.floor(cell.index / 2), 2) * 2;
                       const indices = [start, start + 1, start + 2, start + 3];
                       const activeCount = indices.filter(idx => forgeState.cells[idx]?.isActive).length;
-                      isInteractable = activeCount >= 2;
+                      isInteractable = activeCount >= 1;
                     }
                   }
 

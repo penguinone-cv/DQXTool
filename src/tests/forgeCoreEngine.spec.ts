@@ -100,12 +100,12 @@ function runTests() {
   engineVal.reset('てつのつるぎ', '銅の鍛冶ハンマー', 3, 'val_seed');
   let threwError = false;
   try {
-    engineVal.step('左右打ち', [0]);
+    engineVal.step('左右打ち', [6]);
   } catch (e: any) {
     threwError = true;
     console.log(`PASS: Correctly threw error on invalid horizontal strike: ${e.message}`);
   }
-  assertEquals(threwError, true, 'Engine should throw an error when executing a horizontal strike on a vertical shape');
+  assertEquals(threwError, true, 'Engine should throw an error when executing a horizontal strike on an entirely inactive area');
 
   // Test 5: Glowing cell normal hit and glow consumption
   let normalSeed = '';

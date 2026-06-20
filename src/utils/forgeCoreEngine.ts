@@ -307,18 +307,6 @@ export class ForgeCoreEngine implements IForgeCoreEngine {
       hitIndices = [];
     }
 
-    // Validate target pattern active cell requirements
-    if (skill.targetPattern === 'vertical' || skill.targetPattern === 'horizontal' || skill.targetPattern === 'diagonal') {
-      if (hitIndices.length < 2 || !this.state.cells[hitIndices[0]]?.isActive || !this.state.cells[hitIndices[1]]?.isActive) {
-        throw new Error(`Target cells for ${skill.name} must both be active cells`);
-      }
-    } else if (skill.targetPattern === 'quad') {
-      const activeCount = hitIndices.filter(idx => this.state.cells[idx]?.isActive).length;
-      if (activeCount < 2) {
-        throw new Error(`Target area for ${skill.name} must contain at least 2 active cells`);
-      }
-    }
-
     // Validate that input target indices are within bounds
     for (const idx of targetCellIndices) {
       if (idx < 0 || idx > 7) {
@@ -326,11 +314,11 @@ export class ForgeCoreEngine implements IForgeCoreEngine {
       }
     }
 
-    // The primary clicked/selected cell must be active (unless it's a global action with no targets)
-    if (targetCellIndices.length > 0) {
-      const primaryIdx = targetCellIndices[0];
-      if (!this.state.cells[primaryIdx].isActive) {
-        throw new Error(`Selected target cell ${primaryIdx} is not active for this item shape`);
+    // Validate target pattern active cell requirements: at least 1 targeted cell must be active
+    if (skill.targetPattern !== 'none' && skill.targetPattern !== 'chaos') {
+      const activeCount = hitIndices.filter(idx => this.state.cells[idx]?.isActive).length;
+      if (activeCount < 1) {
+        throw new Error(`Target cells for ${skill.name} must contain at least 1 active cell`);
       }
     }
 
