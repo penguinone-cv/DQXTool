@@ -22,3 +22,28 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Vite cache
+.vite
+
+# Testing and Coverage
+coverage/
+.nyc_output/
+
+# Lint cache
+.eslintcache
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS files
+Thumbs.db
+desktop.ini
+
+# Master Data
+masterdata/

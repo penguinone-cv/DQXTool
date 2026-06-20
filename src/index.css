@@ -5,7 +5,20 @@
 :root {
   font-family: 'Inter', sans-serif;
   color-scheme: dark;
+  font-size: 17.5px;
 }
+
+/* Scale explicit pixel text classes with root font-size */
+.text-\[9px\] {
+  font-size: 0.7rem !important;
+}
+.text-\[10px\] {
+  font-size: 0.75rem !important;
+}
+.text-\[11px\] {
+  font-size: 0.8rem !important;
+}
+
 
 body {
   margin: 0;
@@ -87,3 +100,360 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(156, 163, 175, 0.5);
 }
+
+/* ==========================================================================
+   Light Mode Theme Overrides
+   ========================================================================== */
+
+.light-theme {
+  background-color: #f8fafc !important; /* slate-50 */
+  color: #1e293b !important; /* slate-800 */
+}
+
+/* Header border */
+.light-theme header {
+  border-color: rgba(99, 102, 241, 0.15) !important;
+}
+
+/* Text updates */
+.light-theme h1, 
+.light-theme h2, 
+.light-theme h3 {
+  color: #0f172a !important; /* slate-900 */
+}
+
+.light-theme p, 
+.light-theme label,
+.light-theme span {
+  color: #475569 !important; /* slate-600 */
+}
+
+/* Glass panel */
+.light-theme .glass-panel {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(99, 102, 241, 0.12) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Glass panel accent */
+.light-theme .glass-panel-accent {
+  background: rgba(241, 245, 249, 0.95) !important;
+  border-color: rgba(99, 102, 241, 0.2) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Forms */
+.light-theme select,
+.light-theme input {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important; /* slate-300 */
+  color: #0f172a !important;
+}
+
+.light-theme select:focus,
+.light-theme input:focus {
+  border-color: #6366f1 !important; /* indigo-500 */
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+/* HUD Info cards */
+.light-theme .bg-slate-950\/40 {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+.light-theme .text-slate-500 {
+  color: #64748b !important;
+}
+
+/* Grid Empty cell slot placeholder */
+.light-theme .bg-slate-950\/20 {
+  background-color: rgba(241, 245, 249, 0.5) !important;
+  border-color: rgba(203, 213, 225, 0.6) !important;
+}
+
+/* Active cells */
+.light-theme .bg-slate-950\/55 {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+.light-theme .bg-slate-950\/55:hover {
+  border-color: #94a3b8 !important;
+}
+
+/* Strike target cell hover border */
+.light-theme .ring-indigo-500\/40 {
+  --tw-ring-color: rgba(99, 102, 241, 0.5) !important;
+  background-color: rgba(238, 242, 255, 0.8) !important;
+}
+
+/* Dynamic cell states */
+.light-theme .border-emerald-500 {
+  border-color: #10b981 !important; /* emerald-500 */
+  background-color: rgba(240, 253, 250, 0.9) !important; /* emerald-50 */
+  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.08) !important;
+}
+
+.light-theme .border-rose-500 {
+  border-color: #ef4444 !important; /* rose-50 */
+  background-color: rgba(254, 242, 242, 0.9) !important; /* rose-50 */
+  box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.08) !important;
+}
+
+.light-theme .border-blue-500 {
+  border-color: #3b82f6 !important; /* blue-500 */
+  background-color: rgba(239, 246, 255, 0.9) !important; /* blue-50 */
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.08) !important;
+}
+
+.light-theme .border-amber-600 {
+  border-color: #d97706 !important; /* amber-600 */
+  background-color: rgba(255, 251, 235, 0.85) !important; /* amber-50 */
+}
+
+/* Glowing text colors under light theme */
+.light-theme .text-glow-green {
+  text-shadow: none !important;
+  color: #047857 !important; /* emerald-700 */
+}
+.light-theme .text-glow-yellow {
+  text-shadow: none !important;
+  color: #b45309 !important; /* amber-700 */
+}
+.light-theme .text-glow-red {
+  text-shadow: none !important;
+  color: #b91c1c !important; /* red-700 */
+}
+.light-theme .text-glow-blue {
+  text-shadow: none !important;
+  color: #1d4ed8 !important; /* blue-700 */
+}
+
+/* Inactive button or unlearned skills */
+.light-theme .bg-slate-950\/60 {
+  background-color: rgba(241, 245, 249, 0.6) !important;
+  border-color: rgba(226, 232, 240, 0.7) !important;
+  color: #94a3b8 !important;
+}
+
+/* Muted buttons, list boxes */
+.light-theme .bg-slate-900 {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #1e293b !important;
+}
+
+.light-theme .bg-slate-900:hover:not(:disabled) {
+  background-color: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+
+.light-theme strong {
+  color: #0f172a !important;
+}
+
+/* Action History logs list */
+.light-theme .bg-slate-950\/30 {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+.light-theme .text-slate-350 {
+  color: #334155 !important; /* slate-700 */
+}
+
+/* Divider lines */
+.light-theme .border-slate-800 {
+  border-color: #cbd5e1 !important;
+}
+
+/* Active badges and states */
+.light-theme .text-indigo-400 {
+  color: #4f46e5 !important; /* indigo-600 */
+}
+
+.light-theme .text-indigo-300 {
+  color: #4f46e5 !important;
+}
+
+.light-theme .text-slate-400 {
+  color: #64748b !important; /* slate-500 */
+}
+
+/* MCTS Cards */
+.light-theme .bg-slate-950 {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 4px 0 rgba(0,0,0,0.02) !important;
+}
+
+.light-theme .bg-slate-950:hover {
+  border-color: #94a3b8 !important;
+}
+
+.light-theme .text-slate-450 {
+  color: #64748b !important;
+}
+
+.light-theme .bg-indigo-500\/10 {
+  background-color: rgba(99, 102, 241, 0.1) !important;
+  color: #4f46e5 !important;
+  border-color: rgba(99, 102, 241, 0.2) !important;
+}
+
+/* Slider bars backgrounds */
+.light-theme .bg-slate-950 {
+  background-color: #e2e8f0 !important; /* slate-200 */
+  border-color: #cbd5e1 !important;
+}
+
+/* Scrollbars */
+.light-theme ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+.light-theme ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+
+/* Additional specific overrides for light theme readability */
+.light-theme .bg-slate-950\/55 .text-white,
+.light-theme .bg-slate-950 .text-white,
+.light-theme h1.text-white,
+.light-theme h2.text-white,
+.light-theme h3.text-white {
+  color: #0f172a !important;
+}
+
+/* Empty/active cells index badge and border overrides */
+.light-theme .bg-slate-900\/60 {
+  background-color: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
+  color: #475569 !important;
+}
+.light-theme .bg-slate-900\/60:hover {
+  background-color: #cbd5e1 !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+.light-theme .border-slate-800\/80 {
+  border-color: #cbd5e1 !important;
+}
+
+/* Make "リセット & 初期化" button pop in light theme */
+.light-theme .btn-reset {
+  background: linear-gradient(135deg, #f43f5e, #6366f1) !important;
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.18) !important;
+  color: #ffffff !important;
+}
+.light-theme .btn-reset:hover {
+  background: linear-gradient(135deg, #fb7185, #818cf8) !important;
+  box-shadow: 0 6px 16px rgba(244, 63, 94, 0.28) !important;
+}
+.light-theme .btn-reset span {
+  color: #ffffff !important;
+}
+
+/* Custom premium range slider */
+.custom-range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent !important;
+}
+
+.custom-range-slider::-webkit-slider-runnable-track {
+  background: transparent !important;
+  border: none !important;
+}
+
+.custom-range-slider::-moz-range-track {
+  background: transparent !important;
+  border: none !important;
+}
+
+.custom-range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #ffffff !important;
+  border: 2.5px solid #6366f1 !important; /* indigo-500 */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.1s ease;
+}
+
+.custom-range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  background-color: #f1f5f9 !important;
+}
+
+.custom-range-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #ffffff !important;
+  border: 2.5px solid #6366f1 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.1s ease;
+}
+
+.custom-range-slider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  background-color: #f1f5f9 !important;
+}
+
+/* Light mode thumb adjustments */
+.light-theme .custom-range-slider::-webkit-slider-thumb {
+  border-color: #4f46e5 !important; /* indigo-600 */
+}
+.light-theme .custom-range-slider::-moz-range-thumb {
+  border-color: #4f46e5 !important;
+}
+
+/* Reset focus rings and outlines for custom range slider */
+.custom-range-slider,
+.custom-range-slider:focus,
+.custom-range-slider:active,
+.custom-range-slider:focus-visible,
+.custom-range-slider:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.custom-range-slider::-webkit-slider-thumb:focus,
+.custom-range-slider::-webkit-slider-thumb:active,
+.custom-range-slider::-moz-range-thumb:focus,
+.custom-range-slider::-moz-range-thumb:active {
+  outline: none !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Fade-in animation for modal dialogs */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+
+
+
+

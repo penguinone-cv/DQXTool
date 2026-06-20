@@ -1,0 +1,17 @@
+id,name,level,cost,multiplier,targetPattern,isAim
+tataku,たたく,1,5,1,single,false
+tekagen_uchi,てかげん打ち,3,10,0.5,single,false
+ni_bai_uchi,2倍打ち,5,8,2,single,false
+san_bai_uchi,3倍打ち,16,11,3,single,false
+nerai_uchi,ねらい打ち,23,16,1,single,true
+jow_nerai_uchi,弱ねらい打ち,75,20,0.5,single,true
+neppu_oroshi,熱風おろし,47,6,2.5,single,false
+naname_uchi,ななめ打ち,38,7,1.2,diagonal,false
+joge_uchi,上下打ち,2,8,1.2,vertical,false
+sayu_uchi,左右打ち,80,8,1.2,horizontal,false
+yon_ren_uchi,4連打ち,11,12,1,quad,false
+midare_uchi,みだれ打ち,13,7,0.8,chaos,false
+cho_yon_ren_uchi,超4連打ち,27,18,2,quad,false
+joge_nerai_uchi,上下ねらい打ち,52,25,1.2,vertical,true
+karyoku_age,火力上げ,7,10,0,none,false
+hiyashikomi,冷やし込み,33,12,0,none,false
