@@ -10,6 +10,20 @@ interface FloatingDamage {
   isCrit: boolean;
 }
 
+const SEARCH_MESSAGES = [
+  'ハムスターにエナジードリンクを与えています...',
+  'コーヒーが沸くのを待っています...',
+  '1 と 0 を手作業で丁寧に並び替えています...',
+  'ピザのトッピングについて議論が白熱しています...',
+  '今週分の強戦士の書をやっていないのを思い出しました...',
+  '今デイリーをやっているのでちょっと待ってください...',
+  '開発者が裏で『動けってんだよこのポンコツがぁ！』とコックピットを叩いています...',
+  'バタフライエフェクトを考慮した結果、処理を3秒遅らせることにしました...',
+  'ハムスターが『有給をくれ』とデモを起こしています...',
+  'ハムスターたちが、誰が一番えらいかで揉めています...',
+  '進捗バーが『もっとゆっくり歩きたい』と言うので、付き合っています...'
+];
+
 export default function App() {
   // --- Theme State ---
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -39,7 +53,7 @@ export default function App() {
   const [forgeState, setForgeState] = useState<ForgeState | null>(null);
   const [actionHistory, setActionHistory] = useState<string[]>([]);
   const [floatingDamages, setFloatingDamages] = useState<FloatingDamage[]>([]);
-  
+
   // --- UI Interactive State ---
   const [activeSkillId, setActiveSkillId] = useState<string | null>(null);
   const [hoveredCellIndex, setHoveredCellIndex] = useState<number | null>(null);
@@ -48,7 +62,8 @@ export default function App() {
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [searchProgress, setSearchProgress] = useState<number>(0);
   const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
-  
+  const [searchMessage, setSearchMessage] = useState<string>('');
+
   // Web Worker Ref
   const solverWorkerRef = useRef<Worker | null>(null);
 
@@ -59,7 +74,7 @@ export default function App() {
 
     const seedVal = customSeed.trim() || Math.random().toString(36).substring(2);
     const state = engine.reset(selectedItemId, selectedHammerId, selectedQuality, seedVal, selectedLevel);
-    
+
     setForgeState(state);
     setActionHistory([]);
     setFloatingDamages([]);
@@ -83,15 +98,30 @@ export default function App() {
     };
   }, []);
 
+  // Rotate search message every 3 seconds while searching
+  useEffect(() => {
+    if (!isSearching) return;
+
+    const selectRandomMessage = () => {
+      setSearchMessage(prev => {
+        const available = SEARCH_MESSAGES.filter(msg => msg !== prev);
+        return available[Math.floor(Math.random() * available.length)];
+      });
+    };
+
+    const interval = setInterval(selectRandomMessage, 3000);
+    return () => clearInterval(interval);
+  }, [isSearching]);
+
   // Sync state values and compute hit targets for hovering highlights
   const activeSkill = skills.find(s => s.id === activeSkillId);
 
   const getHoveredCellIndices = (): number[] => {
     if (!activeSkill || hoveredCellIndex === null || !forgeState) return [];
-    
+
     const targetType = activeSkill.targetPattern;
     const size = 8;
-    
+
     if (targetType === 'single') {
       return [hoveredCellIndex];
     }
@@ -154,7 +184,7 @@ export default function App() {
 
     try {
       const nextState = engineRef.current.step(activeSkill.name, targets);
-      
+
       // Calculate damage and detect critical locks by comparing cells
       const newFloating: FloatingDamage[] = [];
       const hitLogs: string[] = [];
@@ -230,7 +260,7 @@ export default function App() {
 
     try {
       const nextState = engineRef.current.step(activeSkill.name, []);
-      
+
       const newFloating: FloatingDamage[] = [];
       const hitLogs: string[] = [];
 
@@ -294,6 +324,8 @@ export default function App() {
       { type: 'module' }
     );
 
+    const randomMsg = SEARCH_MESSAGES[Math.floor(Math.random() * SEARCH_MESSAGES.length)];
+    setSearchMessage(randomMsg);
     setIsSearching(true);
     setSearchProgress(0);
     setAiSuggestions([]);
@@ -320,12 +352,12 @@ export default function App() {
   // Apply suggestion directly from AI Recommendation
   const applyAiRecommendation = (recMove: { actionName: string; targets: number[] }) => {
     if (!engineRef.current || !forgeState) return;
-    
+
     if (recMove.actionName === 'しあげる') {
       handleFinish();
       return;
     }
-    
+
     // Setup skill active and trigger interaction
     const skill = skills.find(s => s.name === recMove.actionName || s.id === recMove.actionName);
     if (!skill) return;
@@ -348,7 +380,7 @@ export default function App() {
 
     try {
       const nextState = engineRef.current.step(skill.name, recMove.targets);
-      
+
       const newFloating: FloatingDamage[] = [];
       const hitLogs: string[] = [];
 
@@ -411,12 +443,12 @@ export default function App() {
     if (!forgeState || !engineRef.current) return;
     const updatedState = cloneForgeState(forgeState);
     updatedState.cells[cellIndex].currentValue = newValue;
-    
+
     // Unlock if value is changed from targetValue
     if (updatedState.cells[cellIndex].isLocked && newValue !== updatedState.cells[cellIndex].targetValue) {
       updatedState.cells[cellIndex].isLocked = false;
     }
-    
+
     setForgeState(updatedState);
     engineRef.current.loadState(updatedState);
     setAiSuggestions([]); // Clear recommendations to prompt recalculation
@@ -556,7 +588,7 @@ export default function App() {
 
       {/* Main Container */}
       <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
+
         {/* Left Column: Preset Setup */}
         <section className="lg:col-span-3 space-y-6">
           <div className="glass-panel rounded-2xl p-5 shadow-xl">
@@ -564,7 +596,7 @@ export default function App() {
               <span>鍛冶の前提設定</span>
               <span className="text-xs bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded border border-indigo-500/20 font-mono">Master</span>
             </h2>
-            
+
             <div className="space-y-4">
               {/* Item Selection */}
               <div>
@@ -606,11 +638,10 @@ export default function App() {
                     <button
                       key={stars}
                       onClick={() => setSelectedQuality(stars)}
-                      className={`flex-1 py-1.5 rounded-lg font-bold text-xs border transition-all duration-150 cursor-pointer ${
-                        selectedQuality === stars
-                          ? 'bg-amber-500 text-slate-950 border-amber-300 font-extrabold shadow shadow-amber-500/20'
-                          : 'bg-slate-950 border-slate-850 text-slate-400 hover:border-slate-750'
-                      }`}
+                      className={`flex-1 py-1.5 rounded-lg font-bold text-xs border transition-all duration-150 cursor-pointer ${selectedQuality === stars
+                        ? 'bg-amber-500 text-slate-950 border-amber-300 font-extrabold shadow shadow-amber-500/20'
+                        : 'bg-slate-950 border-slate-850 text-slate-400 hover:border-slate-750'
+                        }`}
                     >
                       {stars === 0 ? '無印' : '★'.repeat(stars)}
                     </button>
@@ -667,7 +698,7 @@ export default function App() {
 
         {/* Center Column: Interactive Forge Board */}
         <main className="lg:col-span-6 space-y-6">
-          
+
           {/* HUD Info Card */}
           {forgeState && (
             <div className="glass-panel rounded-2xl p-5 shadow-xl relative overflow-hidden border border-slate-900">
@@ -676,9 +707,8 @@ export default function App() {
                 <div className="bg-slate-950/40 p-2.5 rounded-xl border border-slate-850/60 flex flex-col justify-between">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">現在の温度</span>
                   <div className="mt-1 flex items-center justify-center space-x-1">
-                    <span className={`h-2 w-2 rounded-full inline-block animate-pulse ${
-                      forgeState.temperature >= 1500 ? 'bg-red-500' : forgeState.temperature >= 900 ? 'bg-orange-400' : 'bg-sky-400'
-                    }`} />
+                    <span className={`h-2 w-2 rounded-full inline-block animate-pulse ${forgeState.temperature >= 1500 ? 'bg-red-500' : forgeState.temperature >= 900 ? 'bg-orange-400' : 'bg-sky-400'
+                      }`} />
                     <input
                       type="number"
                       min="0"
@@ -689,14 +719,12 @@ export default function App() {
                         const val = Math.max(0, Math.min(3000, Number(e.target.value) || 0));
                         handleTemperatureChange(val);
                       }}
-                      className={`w-16 text-center bg-transparent border-b border-transparent focus:border-indigo-500 focus:outline-none text-xl font-bold font-mono ${
-                        forgeState.temperature >= 1500 ? 'text-red-500 text-glow-red' : forgeState.temperature >= 900 ? 'text-orange-400 text-glow-yellow' : 'text-sky-400 text-glow-blue'
-                      }`}
+                      className={`w-16 text-center bg-transparent border-b border-transparent focus:border-indigo-500 focus:outline-none text-xl font-bold font-mono ${forgeState.temperature >= 1500 ? 'text-red-500 text-glow-red' : forgeState.temperature >= 900 ? 'text-orange-400 text-glow-yellow' : 'text-sky-400 text-glow-blue'
+                        }`}
                       disabled={forgeState.isDone}
                     />
-                    <span className={`text-sm font-semibold font-mono ${
-                      forgeState.temperature >= 1500 ? 'text-red-500' : forgeState.temperature >= 900 ? 'text-orange-400' : 'text-sky-400'
-                    }`}>℃</span>
+                    <span className={`text-sm font-semibold font-mono ${forgeState.temperature >= 1500 ? 'text-red-500' : forgeState.temperature >= 900 ? 'text-orange-400' : 'text-sky-400'
+                      }`}>℃</span>
                   </div>
                 </div>
 
@@ -720,7 +748,7 @@ export default function App() {
                   <div className="relative w-full h-5 mt-1 flex items-center">
                     {/* Background track & Left-side fill */}
                     <div className="absolute left-[10px] right-[10px] h-1.5 bg-slate-950 border border-slate-850 rounded-full overflow-hidden flex items-center pointer-events-none">
-                      <div 
+                      <div
                         className="h-full bg-gradient-to-r from-indigo-600 to-violet-500 rounded-l-full"
                         style={{ width: `${Math.max(0, Math.min(100, (forgeState.focus / forgeState.maxFocus) * 100))}%` }}
                       />
@@ -779,8 +807,8 @@ export default function App() {
                   if (!cell.isActive) {
                     // Render empty cell slot placeholder
                     return (
-                      <div 
-                        key={cell.index} 
+                      <div
+                        key={cell.index}
                         className="h-28 rounded-2xl border border-dashed border-slate-900/60 bg-slate-950/20 opacity-20 flex items-center justify-center"
                       >
                         <span className="text-xs font-mono text-slate-700">#{cell.index} (無効)</span>
@@ -818,7 +846,7 @@ export default function App() {
 
                   // Interactive handlers
                   const isHovered = hoveredCellIndices.includes(cell.index);
-                  
+
                   let isInteractable = activeSkill && !forgeState.isDone;
                   if (isInteractable && activeSkill) {
                     // Check if the cell can be targeted by this skill based on shape layout
@@ -854,16 +882,14 @@ export default function App() {
                       onMouseEnter={() => isInteractable && setHoveredCellIndex(cell.index)}
                       onMouseLeave={() => isInteractable && setHoveredCellIndex(null)}
                       onClick={() => isInteractable && handleCellInteraction(cell.index)}
-                      className={`relative rounded-2xl border p-4.5 transition-all duration-200 text-center flex flex-col justify-between select-none ${borderClass} ${
-                        isHovered ? 'ring-4 ring-indigo-500/40 bg-indigo-950/20 scale-[1.02]' : ''
-                      } ${isInteractable ? 'cursor-pointer hover:border-indigo-500' : ''}`}
+                      className={`relative rounded-2xl border p-4.5 transition-all duration-200 text-center flex flex-col justify-between select-none ${borderClass} ${isHovered ? 'ring-4 ring-indigo-500/40 bg-indigo-950/20 scale-[1.02]' : ''
+                        } ${isInteractable ? 'cursor-pointer hover:border-indigo-500' : ''}`}
                     >
                       {/* Floating damage numbers */}
                       {currentDamage && (
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                          <span className={`text-3xl font-extrabold font-mono animate-float-damage ${
-                            currentDamage.isCrit ? 'text-amber-400 text-glow-yellow' : 'text-white'
-                          }`}>
+                          <span className={`text-3xl font-extrabold font-mono animate-float-damage ${currentDamage.isCrit ? 'text-amber-400 text-glow-yellow' : 'text-white'
+                            }`}>
                             {currentDamage.isCrit ? '🔥会心! ' : ''}{currentDamage.amount}
                           </span>
                         </div>
@@ -896,7 +922,7 @@ export default function App() {
                       {/* Green success zone slider bar */}
                       <div className="w-full bg-slate-950 h-2.5 rounded-full border border-slate-900 relative overflow-hidden">
                         {/* Success range indicator */}
-                        <div 
+                        <div
                           className="absolute h-full bg-emerald-500/20 border-l border-r border-emerald-500/45"
                           style={{
                             left: `${(cell.minGreenValue / 300) * 100}%`,
@@ -904,16 +930,15 @@ export default function App() {
                           }}
                         />
                         {/* Current progress pointer bar */}
-                        <div 
-                          className={`absolute top-0 h-full rounded-full transition-all duration-300 ${
-                            cell.isLocked 
-                              ? 'bg-blue-400 shadow shadow-blue-500' 
-                              : cell.currentValue > cell.maxGreenValue 
-                                ? 'bg-rose-500' 
-                                : cell.currentValue >= cell.minGreenValue 
-                                  ? 'bg-emerald-400 shadow shadow-emerald-500/50' 
-                                  : 'bg-amber-500'
-                          }`}
+                        <div
+                          className={`absolute top-0 h-full rounded-full transition-all duration-300 ${cell.isLocked
+                            ? 'bg-blue-400 shadow shadow-blue-500'
+                            : cell.currentValue > cell.maxGreenValue
+                              ? 'bg-rose-500'
+                              : cell.currentValue >= cell.minGreenValue
+                                ? 'bg-emerald-400 shadow shadow-emerald-500/50'
+                                : 'bg-amber-500'
+                            }`}
                           style={{ width: `${Math.min(100, (cell.currentValue / 300) * 100)}%` }}
                         />
                       </div>
@@ -929,7 +954,7 @@ export default function App() {
                       {cell.isLocked && (
                         <div className="absolute top-2.5 right-2.5 text-blue-400 drop-shadow">
                           <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
                           </svg>
                         </div>
                       )}
@@ -971,12 +996,12 @@ export default function App() {
 
         {/* Right Column: Skills list & AI recommendations */}
         <section className="lg:col-span-3 space-y-6">
-          
+
           {/* Finish Game Panel (Celebration quality screen) */}
           {forgeState && (
             <div className="glass-panel rounded-2xl p-5 shadow-xl">
               <h2 className="text-md font-bold text-white mb-4 border-b border-slate-800 pb-2 tracking-wide">鍛冶の仕上げ</h2>
-              
+
               {!forgeState.isDone ? (
                 <button
                   onClick={handleFinish}
@@ -1011,7 +1036,7 @@ export default function App() {
               <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto pr-1">
                 {skills.map(skill => {
                   const isSelected = activeSkillId === skill.id;
-                  
+
                   // Compute dynamic cost under material changes
                   let cost = skill.cost;
                   if (forgeState.materialType === '集中変化地金') {
@@ -1031,13 +1056,12 @@ export default function App() {
                       key={skill.id}
                       disabled={isDisabled}
                       onClick={() => setActiveSkillId(isSelected ? null : skill.id)}
-                      className={`p-2.5 rounded-xl flex flex-col justify-between text-left border h-20 transition-all duration-150 cursor-pointer ${
-                        isSelected 
-                          ? 'bg-amber-500 text-slate-950 border-amber-300 font-bold shadow-lg shadow-amber-500/10'
-                          : isDisabled
-                            ? 'bg-slate-950/60 border-slate-950 text-slate-600 opacity-35 cursor-not-allowed'
-                            : 'bg-slate-900 border-slate-800 hover:border-slate-750 text-slate-200'
-                      }`}
+                      className={`p-2.5 rounded-xl flex flex-col justify-between text-left border h-20 transition-all duration-150 cursor-pointer ${isSelected
+                        ? 'bg-amber-500 text-slate-950 border-amber-300 font-bold shadow-lg shadow-amber-500/10'
+                        : isDisabled
+                          ? 'bg-slate-950/60 border-slate-950 text-slate-600 opacity-35 cursor-not-allowed'
+                          : 'bg-slate-900 border-slate-800 hover:border-slate-750 text-slate-200'
+                        }`}
                     >
                       <span className="text-xs font-bold truncate">{skill.name}</span>
                       <span className={`text-[9px] font-mono font-semibold mt-1 inline-block ${isSelected ? 'text-slate-950' : hasLevel ? 'text-indigo-400' : 'text-rose-500/80'}`}>
@@ -1057,7 +1081,7 @@ export default function App() {
               <h2 className="text-md font-bold text-white mb-4 border-b border-slate-800 pb-2 flex items-center justify-between">
                 <span className="flex items-center">
                   <svg className="w-5 h-5 mr-1.5 text-indigo-400 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
                   </svg>
                   AIアドバイザー
                 </span>
@@ -1080,7 +1104,7 @@ export default function App() {
                 ) : (
                   <>
                     <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                      <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/>
+                      <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z" />
                     </svg>
                     <span>最善手ルートを探索</span>
                   </>
@@ -1090,7 +1114,7 @@ export default function App() {
               <div className="mt-4 space-y-3.5">
                 {isSearching && (
                   <div className="text-center py-6 text-[10px] text-slate-500 font-medium">
-                    <p className="animate-pulse">Web Workers上でモンテカルロ木探索を実行中...</p>
+                    <p className="animate-pulse">{searchMessage}</p>
                   </div>
                 )}
 
@@ -1103,10 +1127,10 @@ export default function App() {
                 {!isSearching && aiSuggestions.length > 0 && (
                   <div className="space-y-3">
                     <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">推奨アクション TOP3</h3>
-                    
+
                     {aiSuggestions.map((rec, i) => {
                       const label = getMoveTargetLabel(rec.move.actionName, rec.move.targets);
-                      
+
                       return (
                         <div
                           key={i}
@@ -1133,8 +1157,8 @@ export default function App() {
                                 <span className="font-mono text-emerald-400">{(rec.successRate * 100).toFixed(0)}%</span>
                               </div>
                               <div className="w-full bg-slate-900 h-1 rounded overflow-hidden">
-                                <div 
-                                  className="bg-emerald-400 h-full rounded" 
+                                <div
+                                  className="bg-emerald-400 h-full rounded"
                                   style={{ width: `${rec.successRate * 100}%` }}
                                 />
                               </div>
@@ -1146,8 +1170,8 @@ export default function App() {
                                 <span className="font-mono text-indigo-400">{(rec.greatSuccessRate * 100).toFixed(0)}%</span>
                               </div>
                               <div className="w-full bg-slate-900 h-1 overflow-hidden">
-                                <div 
-                                  className="bg-indigo-550 h-full rounded" 
+                                <div
+                                  className="bg-indigo-550 h-full rounded"
                                   style={{ width: `${rec.greatSuccessRate * 100}%` }}
                                 />
                               </div>

@@ -38,10 +38,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2, 4],
     minGreenValues: [24, 28, 24],
     maxGreenValues: [36, 40, 36],
-    maxError3: 1,
-    maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError3: 2,
+    maxError2: 8,
+    maxError1: 13,
+    maxError0: 23
   },
   {
     id: 'dou_no_taiken',
@@ -51,10 +51,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5, 6, 7],
     minGreenValues: [9, 9, 12, 12, 9, 9, 9, 9],
     maxGreenValues: [22, 22, 24, 24, 22, 22, 22, 22],
-    maxError3: 4,
-    maxError2: 8,
-    maxError1: 14,
-    maxError0: 24
+    maxError3: 10,
+    maxError2: 18,
+    maxError1: 33,
+    maxError0: 49
   },
   {
     id: 'tanabata_no_tsurugi',
@@ -64,10 +64,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2, 4],
     minGreenValues: [50, 60, 70],
     maxGreenValues: [56, 70, 80],
-    maxError3: 1,
-    maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError3: 2,
+    maxError2: 8,
+    maxError1: 13,
+    maxError0: 23
   },
   {
     id: 'hoshiboshi_no_taiken',
@@ -77,10 +77,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5, 6, 7],
     minGreenValues: [15, 15, 15, 15, 34, 34, 34, 34],
     maxGreenValues: [25, 25, 25, 25, 42, 42, 42, 42],
-    maxError3: 4,
-    maxError2: 8,
-    maxError1: 14,
-    maxError0: 24
+    maxError3: 10,
+    maxError2: 18,
+    maxError1: 33,
+    maxError0: 49
   },
   {
     id: 'bronze_knife',
@@ -90,10 +90,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2],
     minGreenValues: [40, 40],
     maxGreenValues: [56, 56],
-    maxError3: 1,
+    maxError3: 0,
     maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError1: 9,
+    maxError0: 17
   },
   {
     id: 'dou_no_ono',
@@ -103,10 +103,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 6],
     minGreenValues: [16, 12, 16, 12, 10, 10],
     maxGreenValues: [28, 24, 28, 24, 24, 24],
-    maxError3: 3,
-    maxError2: 7,
-    maxError1: 12,
-    maxError0: 20
+    maxError3: 7,
+    maxError2: 14,
+    maxError1: 25,
+    maxError0: 39
   },
   {
     id: 'dou_no_tsume',
@@ -116,10 +116,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3],
     minGreenValues: [24, 24, 16, 16],
     maxGreenValues: [40, 40, 36, 36],
-    maxError3: 2,
-    maxError2: 5,
-    maxError1: 10,
-    maxError0: 16
+    maxError3: 3,
+    maxError2: 9,
+    maxError1: 17,
+    maxError0: 29
   },
   {
     id: 'seidou_no_tsurugi',
@@ -129,10 +129,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2, 4],
     minGreenValues: [28, 32, 40],
     maxGreenValues: [40, 44, 50],
-    maxError3: 1,
-    maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError3: 2,
+    maxError2: 8,
+    maxError1: 13,
+    maxError0: 23
   },
   {
     id: 'rapier',
@@ -142,10 +142,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2, 4],
     minGreenValues: [30, 40, 50],
     maxGreenValues: [35, 50, 65],
-    maxError3: 1,
-    maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError3: 2,
+    maxError2: 8,
+    maxError1: 13,
+    maxError0: 23
   },
   {
     id: 'seidou_no_taiken',
@@ -155,10 +155,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5, 6, 7],
     minGreenValues: [12, 12, 9, 9, 18, 18, 12, 12],
     maxGreenValues: [24, 24, 22, 22, 36, 36, 24, 24],
-    maxError3: 4,
-    maxError2: 8,
-    maxError1: 14,
-    maxError0: 24
+    maxError3: 10,
+    maxError2: 18,
+    maxError1: 33,
+    maxError0: 49
   },
   {
     id: 'big_blade',
@@ -168,10 +168,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5, 6, 7],
     minGreenValues: [16, 16, 12, 12, 12, 12, 20, 20],
     maxGreenValues: [34, 34, 24, 24, 24, 24, 30, 30],
-    maxError3: 4,
-    maxError2: 8,
-    maxError1: 14,
-    maxError0: 24
+    maxError3: 10,
+    maxError2: 18,
+    maxError1: 33,
+    maxError0: 49
   },
   {
     id: 'seinaru_knife',
@@ -181,10 +181,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2],
     minGreenValues: [60, 60],
     maxGreenValues: [72, 72],
-    maxError3: 1,
+    maxError3: 0,
     maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError1: 9,
+    maxError0: 17
   },
   {
     id: 'dokuga_knife',
@@ -194,10 +194,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2],
     minGreenValues: [50, 70],
     maxGreenValues: [54, 88],
-    maxError3: 1,
+    maxError3: 0,
     maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError1: 9,
+    maxError0: 17
   },
   {
     id: 'seidou_no_yari',
@@ -207,10 +207,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2, 4, 6],
     minGreenValues: [28, 28, 30, 30],
     maxGreenValues: [44, 44, 44, 46],
-    maxError3: 2,
-    maxError2: 5,
-    maxError1: 10,
-    maxError0: 16
+    maxError3: 4,
+    maxError2: 10,
+    maxError1: 17,
+    maxError0: 29
   },
   {
     id: 'long_spear',
@@ -220,10 +220,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2, 4, 6],
     minGreenValues: [40, 30, 30, 20],
     maxGreenValues: [52, 40, 40, 36],
-    maxError3: 2,
-    maxError2: 5,
-    maxError1: 10,
-    maxError0: 16
+    maxError3: 4,
+    maxError2: 10,
+    maxError1: 17,
+    maxError0: 29
   },
   {
     id: 'seidou_no_ono',
@@ -233,10 +233,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 6],
     minGreenValues: [16, 24, 16, 24, 10, 10],
     maxGreenValues: [35, 40, 35, 40, 24, 24],
-    maxError3: 3,
-    maxError2: 7,
-    maxError1: 12,
-    maxError0: 20
+    maxError3: 7,
+    maxError2: 14,
+    maxError1: 25,
+    maxError0: 39
   },
   {
     id: 'sanzoku_no_ono',
@@ -246,10 +246,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 6],
     minGreenValues: [24, 12, 40, 12, 16, 16],
     maxGreenValues: [35, 26, 48, 26, 32, 32],
-    maxError3: 3,
-    maxError2: 7,
-    maxError1: 12,
-    maxError0: 20
+    maxError3: 7,
+    maxError2: 14,
+    maxError1: 25,
+    maxError0: 39
   },
   {
     id: 'seidou_no_tsume',
@@ -259,10 +259,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3],
     minGreenValues: [30, 30, 20, 20],
     maxGreenValues: [46, 46, 36, 36],
-    maxError3: 2,
-    maxError2: 5,
-    maxError1: 10,
-    maxError0: 16
+    maxError3: 3,
+    maxError2: 9,
+    maxError1: 17,
+    maxError0: 29
   },
   {
     id: 'cat_claw',
@@ -272,10 +272,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3],
     minGreenValues: [35, 35, 25, 25],
     maxGreenValues: [52, 52, 40, 40],
-    maxError3: 2,
-    maxError2: 5,
-    maxError1: 10,
-    maxError0: 16
+    maxError3: 3,
+    maxError2: 9,
+    maxError1: 17,
+    maxError0: 29
   },
   {
     id: 'battle_ribbon',
@@ -285,10 +285,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5, 6],
     minGreenValues: [12, 12, 12, 12, 20, 20, 20],
     maxGreenValues: [26, 26, 26, 26, 36, 36, 36],
-    maxError3: 4,
-    maxError2: 8,
-    maxError1: 14,
-    maxError0: 24
+    maxError3: 9,
+    maxError2: 16,
+    maxError1: 29,
+    maxError0: 44
   },
   {
     id: 'seidou_no_kanazuchi',
@@ -298,10 +298,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5],
     minGreenValues: [24, 24, 20, 20, 16, 16],
     maxGreenValues: [40, 40, 36, 36, 28, 28],
-    maxError3: 3,
-    maxError2: 7,
-    maxError1: 12,
-    maxError0: 20
+    maxError3: 7,
+    maxError2: 14,
+    maxError1: 25,
+    maxError0: 39
   },
   {
     id: 'bronze_boomerang',
@@ -311,10 +311,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 3, 4, 5],
     minGreenValues: [20, 20, 20, 20, 20],
     maxGreenValues: [34, 34, 34, 34, 34],
-    maxError3: 2,
-    maxError2: 6,
-    maxError1: 11,
-    maxError0: 18
+    maxError3: 6,
+    maxError2: 13,
+    maxError1: 23,
+    maxError0: 36
   },
   {
     id: 'yaiba_no_boomerang',
@@ -324,10 +324,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 3, 4, 5],
     minGreenValues: [20, 24, 32, 20, 24],
     maxGreenValues: [36, 36, 44, 36, 36],
-    maxError3: 2,
-    maxError2: 6,
-    maxError1: 11,
-    maxError0: 18
+    maxError3: 6,
+    maxError2: 13,
+    maxError1: 23,
+    maxError0: 36
   },
   {
     id: 'tetsu_no_tsurugi',
@@ -337,10 +337,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2, 4],
     minGreenValues: [45, 50, 40],
     maxGreenValues: [55, 62, 48],
-    maxError3: 1,
-    maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError3: 2,
+    maxError2: 8,
+    maxError1: 13,
+    maxError0: 23
   },
   {
     id: 'sanzoku_no_saber',
@@ -350,10 +350,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2, 4],
     minGreenValues: [45, 65, 50],
     maxGreenValues: [52, 78, 60],
-    maxError3: 1,
-    maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError3: 2,
+    maxError2: 8,
+    maxError1: 13,
+    maxError0: 23
   },
   {
     id: 'tetsu_no_taiken',
@@ -363,10 +363,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5, 6, 7],
     minGreenValues: [16, 16, 12, 12, 16, 16, 26, 26],
     maxGreenValues: [28, 28, 26, 26, 28, 28, 36, 36],
-    maxError3: 4,
-    maxError2: 8,
-    maxError1: 14,
-    maxError0: 24
+    maxError3: 10,
+    maxError2: 18,
+    maxError1: 33,
+    maxError0: 49
   },
   {
     id: 'metasura_no_tsurugi',
@@ -376,10 +376,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2, 4],
     minGreenValues: [140, 280, 180],
     maxGreenValues: [144, 291, 190],
-    maxError3: 1,
-    maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError3: 2,
+    maxError2: 8,
+    maxError1: 13,
+    maxError0: 23
   },
   {
     id: 'onikis_no_maken',
@@ -389,10 +389,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2, 4],
     minGreenValues: [154, 240, 310],
     maxGreenValues: [164, 250, 316],
-    maxError3: 1,
-    maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError3: 2,
+    maxError2: 8,
+    maxError1: 13,
+    maxError0: 23
   },
   {
     id: 'metasura_no_taiken',
@@ -402,10 +402,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5, 6, 7],
     minGreenValues: [80, 80, 110, 110, 65, 65, 60, 60],
     maxGreenValues: [86, 86, 120, 120, 75, 75, 68, 68],
-    maxError3: 4,
-    maxError2: 8,
-    maxError1: 14,
-    maxError0: 24
+    maxError3: 10,
+    maxError2: 18,
+    maxError1: 33,
+    maxError0: 49
   },
   {
     id: 'tenma_no_taiken',
@@ -415,10 +415,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5, 6, 7],
     minGreenValues: [70, 132, 100, 70, 70, 60, 85, 85],
     maxGreenValues: [78, 138, 107, 78, 80, 69, 93, 93],
-    maxError3: 4,
-    maxError2: 8,
-    maxError1: 14,
-    maxError0: 24
+    maxError3: 10,
+    maxError2: 18,
+    maxError1: 33,
+    maxError0: 49
   },
   {
     id: 'falcon_dagger',
@@ -428,10 +428,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2],
     minGreenValues: [335, 265],
     maxGreenValues: [343, 270],
-    maxError3: 1,
+    maxError3: 0,
     maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError1: 9,
+    maxError0: 17
   },
   {
     id: 'kogarashi_no_dagger',
@@ -441,10 +441,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2],
     minGreenValues: [294, 410],
     maxGreenValues: [300, 424],
-    maxError3: 1,
+    maxError3: 0,
     maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError1: 9,
+    maxError0: 17
   },
   {
     id: 'metasura_no_yari',
@@ -454,10 +454,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2, 4, 6],
     minGreenValues: [120, 170, 190, 150],
     maxGreenValues: [130, 185, 198, 155],
-    maxError3: 2,
-    maxError2: 5,
-    maxError1: 10,
-    maxError0: 16
+    maxError3: 4,
+    maxError2: 10,
+    maxError1: 17,
+    maxError0: 29
   },
   {
     id: 'seikishi_no_yari',
@@ -467,10 +467,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2, 4, 6],
     minGreenValues: [220, 160, 144, 180],
     maxGreenValues: [230, 166, 156, 190],
-    maxError3: 2,
-    maxError2: 5,
-    maxError1: 10,
-    maxError0: 16
+    maxError3: 4,
+    maxError2: 10,
+    maxError1: 17,
+    maxError0: 29
   },
   {
     id: 'hasha_no_ono',
@@ -480,10 +480,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 6],
     minGreenValues: [88, 88, 100, 130, 150, 74],
     maxGreenValues: [100, 100, 105, 136, 160, 87],
-    maxError3: 3,
-    maxError2: 7,
-    maxError1: 12,
-    maxError0: 20
+    maxError3: 7,
+    maxError2: 14,
+    maxError1: 25,
+    maxError0: 39
   },
   {
     id: 'great_axe',
@@ -493,10 +493,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 6],
     minGreenValues: [80, 170, 130, 102, 100, 90],
     maxGreenValues: [89, 180, 138, 112, 106, 100],
-    maxError3: 3,
-    maxError2: 7,
-    maxError1: 12,
-    maxError0: 20
+    maxError3: 7,
+    maxError2: 14,
+    maxError1: 25,
+    maxError0: 39
   },
   {
     id: 'falcon_claw',
@@ -506,10 +506,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3],
     minGreenValues: [145, 185, 200, 120],
     maxGreenValues: [151, 191, 212, 132],
-    maxError3: 2,
-    maxError2: 5,
-    maxError1: 10,
-    maxError0: 16
+    maxError3: 3,
+    maxError2: 9,
+    maxError1: 17,
+    maxError0: 29
   },
   {
     id: 'meiju_no_tsume',
@@ -519,10 +519,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3],
     minGreenValues: [130, 190, 190, 130],
     maxGreenValues: [136, 201, 201, 136],
-    maxError3: 2,
-    maxError2: 5,
-    maxError1: 10,
-    maxError0: 16
+    maxError3: 3,
+    maxError2: 9,
+    maxError1: 17,
+    maxError0: 29
   },
   {
     id: 'serpent_whip',
@@ -532,10 +532,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5, 6],
     minGreenValues: [76, 66, 90, 76, 116, 120, 86],
     maxGreenValues: [90, 82, 96, 81, 129, 128, 94],
-    maxError3: 4,
-    maxError2: 8,
-    maxError1: 14,
-    maxError0: 24
+    maxError3: 9,
+    maxError2: 16,
+    maxError1: 29,
+    maxError0: 44
   },
   {
     id: 'joou_no_muchi',
@@ -545,10 +545,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5, 6],
     minGreenValues: [100, 72, 72, 100, 166, 90, 72],
     maxGreenValues: [109, 82, 82, 109, 176, 96, 82],
-    maxError3: 4,
-    maxError2: 8,
-    maxError1: 14,
-    maxError0: 24
+    maxError3: 9,
+    maxError2: 16,
+    maxError1: 29,
+    maxError0: 44
   },
   {
     id: 'gordon_hammer',
@@ -558,10 +558,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5],
     minGreenValues: [130, 130, 90, 110, 85, 85],
     maxGreenValues: [140, 140, 95, 116, 100, 97],
-    maxError3: 3,
-    maxError2: 7,
-    maxError1: 12,
-    maxError0: 20
+    maxError3: 7,
+    maxError2: 14,
+    maxError1: 25,
+    maxError0: 39
   },
   {
     id: 'megaton_hammer',
@@ -571,10 +571,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5],
     minGreenValues: [85, 130, 130, 120, 90, 85],
     maxGreenValues: [94, 138, 138, 126, 100, 94],
-    maxError3: 3,
-    maxError2: 7,
-    maxError1: 12,
-    maxError0: 20
+    maxError3: 7,
+    maxError2: 14,
+    maxError1: 25,
+    maxError0: 39
   },
   {
     id: 'metal_wing',
@@ -584,10 +584,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 3, 4, 5],
     minGreenValues: [110, 120, 170, 125, 90],
     maxGreenValues: [116, 130, 183, 135, 98],
-    maxError3: 2,
-    maxError2: 6,
-    maxError1: 11,
-    maxError0: 18
+    maxError3: 6,
+    maxError2: 13,
+    maxError1: 23,
+    maxError0: 36
   },
   {
     id: 'pentagram',
@@ -597,10 +597,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 3, 4, 5],
     minGreenValues: [130, 170, 125, 125, 90],
     maxGreenValues: [136, 179, 135, 135, 98],
-    maxError3: 2,
-    maxError2: 6,
-    maxError1: 11,
-    maxError0: 18
+    maxError3: 6,
+    maxError2: 13,
+    maxError1: 23,
+    maxError0: 36
   },
   {
     id: 'mayoke_no_kama',
@@ -610,10 +610,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 4, 6],
     minGreenValues: [105, 103, 97, 80, 80],
     maxGreenValues: [115, 112, 105, 88, 88],
-    maxError3: 2,
-    maxError2: 6,
-    maxError1: 11,
-    maxError0: 18
+    maxError3: 5,
+    maxError2: 13,
+    maxError1: 21,
+    maxError0: 33
   },
   {
     id: 'dark_scythe',
@@ -623,10 +623,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 4, 6],
     minGreenValues: [120, 160, 120, 120, 120],
     maxGreenValues: [129, 170, 128, 128, 128],
-    maxError3: 2,
-    maxError2: 6,
-    maxError1: 11,
-    maxError0: 18
+    maxError3: 5,
+    maxError2: 13,
+    maxError1: 21,
+    maxError0: 33
   },
   {
     id: 'hayabusa_no_tsurugi_kai',
@@ -636,10 +636,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2, 4],
     minGreenValues: [341, 294, 245],
     maxGreenValues: [347, 304, 255],
-    maxError3: 1,
-    maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError3: 2,
+    maxError2: 8,
+    maxError1: 13,
+    maxError0: 23
   },
   {
     id: 'valkyrie',
@@ -649,10 +649,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 4, 6],
     minGreenValues: [210, 210, 150, 160, 160],
     maxGreenValues: [220, 218, 159, 168, 168],
-    maxError3: 2,
-    maxError2: 6,
-    maxError1: 11,
-    maxError0: 18
+    maxError3: 5,
+    maxError2: 13,
+    maxError1: 21,
+    maxError0: 33
   },
   {
     id: 'rufu_no_tate',
@@ -662,10 +662,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3],
     minGreenValues: [90, 140, 140, 90],
     maxGreenValues: [98, 151, 151, 98],
-    maxError3: 2,
-    maxError2: 5,
-    maxError1: 10,
-    maxError0: 16
+    maxError3: 3,
+    maxError2: 9,
+    maxError1: 17,
+    maxError0: 29
   },
   {
     id: 'metasura_no_tate',
@@ -675,10 +675,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3],
     minGreenValues: [200, 160, 120, 150],
     maxGreenValues: [214, 166, 128, 158],
-    maxError3: 2,
-    maxError2: 5,
-    maxError1: 10,
-    maxError0: 16
+    maxError3: 3,
+    maxError2: 9,
+    maxError1: 17,
+    maxError0: 29
   },
   {
     id: 'spike_visor',
@@ -688,10 +688,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3],
     minGreenValues: [180, 180, 140, 140],
     maxGreenValues: [186, 186, 152, 152],
-    maxError3: 2,
-    maxError2: 5,
-    maxError1: 10,
-    maxError0: 16
+    maxError3: 3,
+    maxError2: 9,
+    maxError1: 17,
+    maxError0: 29
   },
   {
     id: 'spike_armor_up',
@@ -701,10 +701,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5],
     minGreenValues: [102, 102, 140, 140, 78, 78],
     maxGreenValues: [112, 112, 146, 146, 87, 87],
-    maxError3: 3,
-    maxError2: 7,
-    maxError1: 12,
-    maxError0: 20
+    maxError3: 7,
+    maxError2: 14,
+    maxError1: 25,
+    maxError0: 39
   },
   {
     id: 'spike_armor_down',
@@ -714,10 +714,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5, 6, 7],
     minGreenValues: [72, 72, 100, 100, 64, 64, 84, 84],
     maxGreenValues: [80, 80, 106, 106, 74, 74, 92, 92],
-    maxError3: 4,
-    maxError2: 8,
-    maxError1: 14,
-    maxError0: 24
+    maxError3: 10,
+    maxError2: 18,
+    maxError1: 33,
+    maxError0: 49
   },
   {
     id: 'spike_glove',
@@ -727,10 +727,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2, 4],
     minGreenValues: [215, 150, 275],
     maxGreenValues: [226, 156, 285],
-    maxError3: 1,
-    maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError3: 2,
+    maxError2: 8,
+    maxError1: 13,
+    maxError0: 23
   },
   {
     id: 'spike_boots',
@@ -740,10 +740,10 @@ export const items: ItemData[] = [
     activeIndices: [1, 3, 4, 5],
     minGreenValues: [160, 200, 160, 120],
     maxGreenValues: [172, 206, 172, 128],
-    maxError3: 2,
-    maxError2: 5,
-    maxError1: 10,
-    maxError0: 16
+    maxError3: 4,
+    maxError2: 10,
+    maxError1: 17,
+    maxError0: 29
   },
   {
     id: 'platinum_kaji_hammer',
@@ -753,10 +753,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4],
     minGreenValues: [95, 120, 75, 90, 60],
     maxGreenValues: [103, 126, 85, 98, 73],
-    maxError3: 2,
-    maxError2: 6,
-    maxError1: 11,
-    maxError0: 18
+    maxError3: 5,
+    maxError2: 13,
+    maxError1: 21,
+    maxError0: 33
   },
   {
     id: 'platinum_mokkou_tou',
@@ -766,10 +766,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2, 4],
     minGreenValues: [170, 135, 115],
     maxGreenValues: [175, 143, 122],
-    maxError3: 1,
-    maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError3: 2,
+    maxError2: 8,
+    maxError1: 13,
+    maxError0: 23
   },
   {
     id: 'platinum_saihou_hari',
@@ -779,10 +779,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2],
     minGreenValues: [180, 240],
     maxGreenValues: [186, 244],
-    maxError3: 1,
+    maxError3: 0,
     maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError1: 9,
+    maxError0: 17
   },
   {
     id: 'platinum_frypan',
@@ -792,10 +792,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5, 6],
     minGreenValues: [55, 42, 55, 78, 90, 78, 42],
     maxGreenValues: [66, 50, 66, 87, 98, 87, 50],
-    maxError3: 4,
-    maxError2: 8,
-    maxError1: 14,
-    maxError0: 24
+    maxError3: 9,
+    maxError2: 16,
+    maxError1: 29,
+    maxError0: 44
   },
   {
     id: 'platinum_renkin_lamp',
@@ -805,10 +805,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3],
     minGreenValues: [115, 100, 145, 80],
     maxGreenValues: [123, 107, 155, 90],
-    maxError3: 2,
-    maxError2: 5,
-    maxError1: 10,
-    maxError0: 16
+    maxError3: 3,
+    maxError2: 9,
+    maxError1: 17,
+    maxError0: 29
   },
   {
     id: 'platinum_renkin_tsubo',
@@ -818,10 +818,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5],
     minGreenValues: [60, 90, 70, 70, 90, 60],
     maxGreenValues: [70, 100, 77, 77, 100, 70],
-    maxError3: 3,
-    maxError2: 7,
-    maxError1: 12,
-    maxError0: 20
+    maxError3: 7,
+    maxError2: 14,
+    maxError1: 25,
+    maxError0: 39
   },
   {
     id: 'super_frypan',
@@ -831,10 +831,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5, 6],
     minGreenValues: [65, 65, 65, 80, 109, 96, 80],
     maxGreenValues: [76, 76, 76, 88, 115, 105, 88],
-    maxError3: 4,
-    maxError2: 8,
-    maxError1: 14,
-    maxError0: 24
+    maxError3: 9,
+    maxError2: 16,
+    maxError1: 29,
+    maxError0: 44
   },
   {
     id: 'miracle_kaji_hammer',
@@ -844,10 +844,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4],
     minGreenValues: [150, 160, 80, 130, 120],
     maxGreenValues: [156, 170, 86, 139, 129],
-    maxError3: 2,
-    maxError2: 6,
-    maxError1: 11,
-    maxError0: 18
+    maxError3: 5,
+    maxError2: 13,
+    maxError1: 21,
+    maxError0: 33
   },
   {
     id: 'miracle_mokkou_tou',
@@ -857,10 +857,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2, 4],
     minGreenValues: [230, 200, 274],
     maxGreenValues: [238, 206, 286],
-    maxError3: 1,
-    maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError3: 2,
+    maxError2: 8,
+    maxError1: 13,
+    maxError0: 23
   },
   {
     id: 'miracle_saihou_hari',
@@ -870,10 +870,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 2],
     minGreenValues: [314, 390],
     maxGreenValues: [320, 404],
-    maxError3: 1,
+    maxError3: 0,
     maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError1: 9,
+    maxError0: 17
   },
   {
     id: 'miracle_frypan',
@@ -883,10 +883,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5, 6],
     minGreenValues: [72, 110, 134, 90, 90, 72, 72],
     maxGreenValues: [82, 120, 146, 96, 96, 82, 82],
-    maxError3: 4,
-    maxError2: 8,
-    maxError1: 14,
-    maxError0: 24
+    maxError3: 9,
+    maxError2: 16,
+    maxError1: 29,
+    maxError0: 44
   },
   {
     id: 'miracle_renkin_lamp',
@@ -896,10 +896,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3],
     minGreenValues: [120, 190, 190, 140],
     maxGreenValues: [132, 198, 198, 146],
-    maxError3: 2,
-    maxError2: 5,
-    maxError1: 10,
-    maxError0: 16
+    maxError3: 3,
+    maxError2: 9,
+    maxError1: 17,
+    maxError0: 29
   },
   {
     id: 'miracle_renkin_tsubo',
@@ -909,10 +909,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5],
     minGreenValues: [70, 150, 150, 100, 100, 70],
     maxGreenValues: [80, 158, 158, 106, 106, 80],
-    maxError3: 3,
-    maxError2: 7,
-    maxError1: 12,
-    maxError0: 20
+    maxError3: 7,
+    maxError2: 14,
+    maxError1: 25,
+    maxError0: 39
   },
   {
     id: 'togetoge_lure',
@@ -922,10 +922,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2],
     minGreenValues: [180, 180, 256],
     maxGreenValues: [190, 190, 262],
-    maxError3: 1,
-    maxError2: 4,
-    maxError1: 8,
-    maxError0: 14
+    maxError3: 2,
+    maxError2: 8,
+    maxError1: 13,
+    maxError0: 23
   },
   {
     id: 'nijiiro_no_orb',
@@ -935,10 +935,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5],
     minGreenValues: [85, 140, 115, 140, 115, 85],
     maxGreenValues: [95, 148, 121, 148, 121, 95],
-    maxError3: 3,
-    maxError2: 7,
-    maxError1: 12,
-    maxError0: 20
+    maxError3: 7,
+    maxError2: 14,
+    maxError1: 24,
+    maxError0: 27
   },
   {
     id: 'super_yousei_no_hidane',
@@ -948,10 +948,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5],
     minGreenValues: [180, 250, 210, 250, 210, 145],
     maxGreenValues: [190, 258, 216, 258, 216, 155],
-    maxError3: 3,
-    maxError2: 7,
-    maxError1: 12,
-    maxError0: 20
+    maxError3: 7,
+    maxError2: 14,
+    maxError1: 24,
+    maxError0: 27
   },
   {
     id: 'super_kagayaki_no_jueki',
@@ -961,10 +961,10 @@ export const items: ItemData[] = [
     activeIndices: [0, 1, 2, 3, 4, 5],
     minGreenValues: [155, 220, 155, 220, 140, 140],
     maxGreenValues: [161, 230, 161, 230, 150, 150],
-    maxError3: 3,
-    maxError2: 7,
-    maxError1: 12,
-    maxError0: 20
+    maxError3: 7,
+    maxError2: 14,
+    maxError1: 24,
+    maxError0: 27
   }
 ];
 
