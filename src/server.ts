@@ -79,8 +79,8 @@ app.post(['/api/recommend', '/DQXTool/api/recommend'], async (req: express.Reque
       return res.status(400).json({ error: 'Missing required parameters: state' });
     }
 
-    // モデル予測＋MCTS探索 (400回シミュレーション) の実行
-    const recommendations = await mctsSearch.search(state, 400);
+    // モデル予測＋MCTS探索 (2000回シミュレーション) の実行
+    const recommendations = await mctsSearch.search(state, 2000);
 
     // トップ3を返却
     return res.json(recommendations.slice(0, 3));

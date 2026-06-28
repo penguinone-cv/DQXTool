@@ -98,11 +98,7 @@ export class InferenceClient {
       mockPolicy[16 * 8] = 5.0; 
       const mockValue = 0.8;
       
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({ policy: mockPolicy, value: mockValue });
-        }, 2);
-      });
+      return Promise.resolve({ policy: mockPolicy, value: mockValue });
     }
 
     return new Promise((resolve, reject) => {
@@ -156,7 +152,7 @@ export class MCTSNode {
 // AlphaZero風 MCTS 探索エンジン
 export class MctsSearch {
   private client: InferenceClient;
-  private cPuct = 0.5; // 探索度を調整する PUCT 定数 (探索評価Q値の比重を高めるために小さく設定)
+  private cPuct = 0.8; // 探索度を調整する PUCT 定数 (シミュレーション2000回規模に最適化)
 
   constructor(client: InferenceClient) {
     this.client = client;
