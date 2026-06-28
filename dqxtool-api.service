@@ -1,0 +1,28 @@
+[Unit]
+Description=DQX Blacksmith Simulator API Server (ONNX Inference Backend)
+After=network.target
+
+[Service]
+Type=simple
+# 本番環境の実行ユーザー名に変更してください (例: ubuntu, www-data, node)
+User=ubuntu
+
+# Gitリポジトリが配置されている元のプロジェクトルートを指定してください
+WorkingDirectory=/home/ubuntu/DQXTool
+
+# npm の絶対パスを指定してください (which npm で確認できます)
+ExecStart=/usr/bin/npm run server
+
+# サーバーが落ちた場合に自動で再起動する設定
+Restart=on-failure
+RestartSec=5
+
+# 環境変数の設定 (ポート番号などを指定可能)
+Environment=PORT=3001 NODE_ENV=production
+
+# ログをシステムジャーナルに出力
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
