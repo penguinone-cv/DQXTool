@@ -4,7 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import type { ForgeState } from './forgeCoreEngine';
 import { ForgeCoreEngine } from './forgeCoreEngine';
-import { cloneForgeState, getPossibleMovesForSolver } from './solverUtils';
+import { cloneForgeState, getPossibleMovesForSolver, evaluateStateScore } from './solverUtils';
 import { extractFeatures } from './featureExtractor';
 import { skills } from '../data/masterData';
 
@@ -156,7 +156,7 @@ export class MCTSNode {
 // AlphaZero風 MCTS 探索エンジン
 export class MctsSearch {
   private client: InferenceClient;
-  private cPuct = 1.2; // 探索度を調整する PUCT 定数
+  private cPuct = 0.5; // 探索度を調整する PUCT 定数 (探索評価Q値の比重を高めるために小さく設定)
 
   constructor(client: InferenceClient) {
     this.client = client;
@@ -282,8 +282,20 @@ export class MctsSearch {
       }
     }
 
-    // 価値予測（-1.0〜1.0）を 0.0〜1.0 の価値に変換して返却
-    return (value + 1.0) / 2.0;
+    // 価値予測（-1.0〜1.0）を 0.0〜1.0 の価値に変換
+    const modelVal = (value + 1.0) / 2.0;
+
+    // ルールベースのヒューリスティック評価（緑ゲージ侵入やズレペナルティ）をブレンド
+    // これにより、すでに緑ゲージにあるマスをさらに叩く行為を確実にペナルティとして検知します
+    const rawScore = evaluateStateScore(node.state);
+    const activeCount = node.state.cells.filter(c => c.isActive).length;
+    const maxPossible = activeCount * 250; // 最大250点/マスと仮定
+    // -300 〜 maxPossible を 0.0 〜 1.0 に正規化
+    const heuristicVal = Math.min(1.0, Math.max(0.0, (rawScore + 300) / (maxPossible + 300)));
+
+    // ブレンド比率 (モデル 50%, ヒューリスティック 50%)
+    const blendBeta = 0.5;
+    return blendBeta * modelVal + (1.0 - blendBeta) * heuristicVal;
   }
 
   private evaluateTerminalState(state: ForgeState): number {
