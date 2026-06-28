@@ -106,8 +106,6 @@ export const loadAndJoinItems = async (): Promise<ItemData[]> => {
       });
     });
 
-    // グローバルキャッシュを同期
-    globalItemsRegistry = items;
     return items;
   } finally {
     // 確実にロックを解放
@@ -127,80 +125,4 @@ export const appendItemToCsv = async (row: string): Promise<void> => {
   } finally {
     releaseLock();
   }
-};
-
-// --- 同期型ロードおよびグローバルレジストリサポート ---
-export let globalItemsRegistry: ItemData[] = [];
-
-export const setGlobalItemsRegistry = (items: ItemData[]) => {
-  globalItemsRegistry = items;
-};
-
-export const loadAndJoinItemsSync = (): ItemData[] => {
-  try {
-    if (!fs.existsSync(csvPath)) return [];
-    const csvContent = fs.readFileSync(csvPath, 'utf8');
-    const lines = csvContent.split('\n');
-    const items: ItemData[] = [];
-
-    lines.forEach((line, index) => {
-      if (index === 0 || !line.trim()) return;
-      
-      const parts: string[] = [];
-      let current = '';
-      let inQuotes = false;
-      for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        if (char === '"') {
-          inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-          parts.push(current);
-          current = '';
-        } else {
-          current += char;
-        }
-      }
-      parts.push(current);
-
-      if (parts.length < 6) return;
-
-      const id = parts[0].trim();
-      const name = parts[1].trim();
-      const categoryId = parts[2].trim();
-      const materialType = parts[3].trim();
-      const minGreenValues = parts[4].split(',').map(Number);
-      const maxGreenValues = parts[5].split(',').map(Number);
-
-      const category = categories.find(c => c.id === categoryId);
-      if (!category) return;
-
-      items.push({
-        id,
-        name,
-        category: category.name,
-        materialType,
-        activeIndices: category.activeIndices,
-        minGreenValues,
-        maxGreenValues,
-        maxError3: category.errors[0],
-        maxError2: category.errors[1],
-        maxError1: category.errors[2],
-        maxError0: category.errors[3]
-      });
-    });
-
-    globalItemsRegistry = items;
-    return items;
-  } catch (err) {
-    // fs が存在しないブラウザ環境などでは何もしない
-    return [];
-  }
-};
-
-// 呼び出し元が同期的に items リストを取得する用
-export const getGlobalItems = (): ItemData[] => {
-  if (globalItemsRegistry.length === 0) {
-    loadAndJoinItemsSync();
-  }
-  return globalItemsRegistry;
 };

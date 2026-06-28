@@ -170,7 +170,7 @@ export default function App() {
     engineRef.current = engine;
 
     const seedVal = customSeed.trim() || Math.random().toString(36).substring(2);
-    const state = engine.reset(selectedItemId, selectedHammerId, selectedQuality, seedVal, selectedLevel);
+    const state = engine.reset(selectedItemId, selectedHammerId, selectedQuality, seedVal, selectedLevel, itemsList);
 
     setForgeState(state);
     setActionHistory([]);
@@ -198,7 +198,7 @@ export default function App() {
           const engine = new ForgeCoreEngine();
           engineRef.current = engine;
           const seedVal = customSeed.trim() || Math.random().toString(36).substring(2);
-          const state = engine.reset(loadedItems[0].id, selectedHammerId, selectedQuality, seedVal, selectedLevel);
+          const state = engine.reset(loadedItems[0].id, selectedHammerId, selectedQuality, seedVal, selectedLevel, loadedItems);
           setForgeState(state);
         }
       } catch (err) {

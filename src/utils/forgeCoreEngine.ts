@@ -1,5 +1,4 @@
 import { hammers, skills, levelFocusMap } from '../data/masterData';
-import { getGlobalItems } from './itemLoader';
 import type { ItemData, HammerData } from '../data/masterData';
 
 export interface ForgeCell {
@@ -83,8 +82,7 @@ export class ForgeCoreEngine implements IForgeCoreEngine {
   private activeHammer!: HammerData;
   private hammerQuality!: number;
 
-  reset(itemName: string, hammerName: string, hammerQuality: number, seed?: string, characterLevel?: number): ForgeState {
-    const itemsList = getGlobalItems();
+  reset(itemName: string, hammerName: string, hammerQuality: number, seed?: string, characterLevel?: number, itemsList: ItemData[] = []): ForgeState {
     const matchedItem = itemsList.find(i => i.name === itemName || i.id === itemName);
     if (!matchedItem) {
       throw new Error(`Item not found: ${itemName}`);
@@ -176,7 +174,7 @@ export class ForgeCoreEngine implements IForgeCoreEngine {
     };
   }
 
-  loadState(state: ForgeState) {
+  loadState(state: ForgeState, itemsList: ItemData[] = []) {
     const actualLevel = state.characterLevel || 80;
     this.state = {
       temperature: state.temperature,
@@ -193,7 +191,6 @@ export class ForgeCoreEngine implements IForgeCoreEngine {
     this.prng = new PRNG(state.seed);
     
     // Resolve matching item/hammer databases
-    const itemsList = getGlobalItems();
     const matchedItem = itemsList.find(i => i.materialType === state.materialType);
     this.activeItem = matchedItem || itemsList[0];
     const levelFocus = levelFocusMap[actualLevel] || 207;

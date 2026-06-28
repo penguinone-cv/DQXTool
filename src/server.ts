@@ -48,7 +48,7 @@ app.post('/api/reset', async (req: express.Request, res: express.Response): Prom
     }
 
     // まずは鍛冶エンジンを初期リセット
-    const state = engine.reset(itemName, hammerName, Number(hammerQuality), seed, characterLevel ? Number(characterLevel) : undefined);
+    const state = engine.reset(itemName, hammerName, Number(hammerQuality), seed, characterLevel ? Number(characterLevel) : undefined, itemsCache);
 
     // リセットされたステートからアイテムデータを正確に特定
     const matchedItem = estimateItem(state, itemsCache);

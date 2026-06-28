@@ -27,7 +27,7 @@ async function runSolverTests() {
 
 
   const engine = new ForgeCoreEngine();
-  const state: ForgeState = engine.reset('てつのつるぎ', '鉄の鍛冶ハンマー', 3, 'tddseed123');
+  const state: ForgeState = engine.reset('てつのつるぎ', '鉄の鍛冶ハンマー', 3, 'tddseed123', undefined, items);
 
   // Solverのインスタンス化テスト
   console.log('[Test] Solver Instantiation');
