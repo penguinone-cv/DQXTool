@@ -41,36 +41,43 @@ int main(int argc, char* argv[]) {
 
         if (cli_mode) {
             // ==================================================================
-            // CLIモード: 標準入力から74個のfloat特徴量を読み込んで推論し、JSONで出力
+            // CLIモード: 標準入力から1行（74個のfloat）読み込むたびに推論し、JSONで出力 (常駐対話モード)
             // ==================================================================
             PolicyValuePredictor predictor(model_path);
             
-            std::vector<float> input_features;
-            float val;
-            
-            // 74個の値が読み込めるまで標準入力から取得
-            while (input_features.size() < 74 && (std::cin >> val)) {
-                input_features.push_back(val);
+            std::string line;
+            // 標準入力から行単位でEOFまで待ち受ける
+            while (std::getline(std::cin, line)) {
+                if (line.empty()) continue;
+                if (line == "exit" || line == "quit") break;
+
+                std::stringstream ss(line);
+                std::vector<float> input_features;
+                float val;
+                
+                while (ss >> val) {
+                    input_features.push_back(val);
+                }
+
+                if (input_features.size() != 74) {
+                    std::cout << "{\"error\":\"Invalid input dimension. Expected 74 values, got " 
+                              << input_features.size() << "\"}" << std::endl;
+                    continue;
+                }
+
+                std::vector<float> policy_logits;
+                float value = 0.0f;
+
+                predictor.Predict(input_features, policy_logits, value);
+
+                // 軽量化・簡素化のためにマニュアルでJSONを構築して出力 (1行で出力)
+                std::cout << "{\"policy\":[";
+                for (size_t i = 0; i < policy_logits.size(); ++i) {
+                    std::cout << policy_logits[i];
+                    if (i + 1 < policy_logits.size()) std::cout << ",";
+                }
+                std::cout << "],\"value\":" << value << "}" << std::endl;
             }
-
-            if (input_features.size() != 74) {
-                std::cout << "{\"error\":\"Invalid input dimension. Expected 74 values, got " 
-                          << input_features.size() << "\"}" << std::endl;
-                return 1;
-            }
-
-            std::vector<float> policy_logits;
-            float value = 0.0f;
-
-            predictor.Predict(input_features, policy_logits, value);
-
-            // 軽量化・簡素化のためにマニュアルでJSONを構築して出力
-            std::cout << "{\"policy\":[";
-            for (size_t i = 0; i < policy_logits.size(); ++i) {
-                std::cout << policy_logits[i];
-                if (i + 1 < policy_logits.size()) std::cout << ",";
-            }
-            std::cout << "],\"value\":" << value << "}" << std::endl;
 
             return 0;
         }
