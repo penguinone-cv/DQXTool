@@ -47,3 +47,7 @@ desktop.ini
 
 # Master Data
 masterdata/
+
+# C++ Backend and ONNX Runtime
+cpp_backend/build/
+cpp_backend/third_party/
