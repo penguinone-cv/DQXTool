@@ -5,9 +5,19 @@ interface WorkRequest {
   state: ForgeState;
 }
 
-// ModelSolver の初期化（デフォルトのAPIサーバー宛て）
-// 本番環境や開発環境のドメインに合わせて引数で調整可能です
-const solver = new ModelSolver('http://localhost:3001');
+// 接続先APIサーバーURLの自動動的判定 (Web Worker内では self.location を使用)
+const getApiUrl = (): string => {
+  if (typeof self !== 'undefined' && self.location && self.location.hostname) {
+    const host = self.location.hostname;
+    // localhost や 127.0.0.1 以外の本番サーバーIP/ドメインにアクセスしている場合、そのIPのポート3001に接続する
+    if (host && host !== '' && host !== 'localhost' && host !== '127.0.0.1') {
+      return `http://${host}:3001`;
+    }
+  }
+  return 'http://localhost:3001';
+};
+
+const solver = new ModelSolver(getApiUrl());
 
 // Web Worker のメッセージリスナー
 self.onmessage = async (e: MessageEvent) => {
