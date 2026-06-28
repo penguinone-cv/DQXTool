@@ -1,4 +1,4 @@
-import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
+import { spawn, type ChildProcessWithoutNullStreams } from 'child_process';
 import readline from 'readline';
 import path from 'path';
 import fs from 'fs';
@@ -170,7 +170,6 @@ export class MctsSearch {
 
     for (let sim = 0; sim < numSimulations; sim++) {
       let node = root;
-      const simEngine = new ForgeCoreEngine();
 
       // 1. Selection (PUCT 値が最大の子を再帰的に選択)
       while (node.isExpanded) {
