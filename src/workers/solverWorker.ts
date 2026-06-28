@@ -5,14 +5,16 @@ interface WorkRequest {
   state: ForgeState;
 }
 
-// 接続先APIサーバーURLの自動動的判定 (Web Worker内では self.location を使用)
+// 接続先APIサーバーURLの自動判定
+// CloudflareやHTTPS環境、リバースプロキシに対応するため、アクセスしているドメイン（origin）をそのまま使用します。
 const getApiUrl = (): string => {
-  if (typeof self !== 'undefined' && self.location && self.location.hostname) {
-    const host = self.location.hostname;
-    // localhost や 127.0.0.1 以外の本番サーバーIP/ドメインにアクセスしている場合、そのIPのポート3001に接続する
-    if (host && host !== '' && host !== 'localhost' && host !== '127.0.0.1') {
-      return `http://${host}:3001`;
+  if (typeof self !== 'undefined' && self.location && self.location.origin) {
+    // 開発環境の Vite ポート(例: 5173)の場合は localhost:3001 に直接繋ぐ
+    if (self.location.port === '5173') {
+      return 'http://localhost:3001';
     }
+    // 本番環境（HTTPS等）では、同じドメインの相対パス（リバースプロキシ経由）で通信します
+    return self.location.origin;
   }
   return 'http://localhost:3001';
 };
