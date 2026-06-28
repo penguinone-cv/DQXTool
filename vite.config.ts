@@ -8,7 +8,9 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
-      '/api': 'http://localhost:3001'
+      '/api': 'http://localhost:3001',
+      '/dqxtool/api': 'http://localhost:3001',
+      '/DQXTool/api': 'http://localhost:3001'
     }
   }
 })

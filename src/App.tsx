@@ -25,6 +25,48 @@ const SEARCH_MESSAGES = [
 
 
 
+const DEFAULT_FALLBACK_ITEMS = [
+  {
+    id: '10001',
+    name: 'どうのつるぎ',
+    category: '片手剣',
+    materialType: '通常',
+    activeIndices: [0, 2, 4],
+    minGreenValues: [24, 28, 24],
+    maxGreenValues: [36, 40, 36],
+    maxError3: 2,
+    maxError2: 8,
+    maxError1: 13,
+    maxError0: 23
+  },
+  {
+    id: '10024',
+    name: 'てつのつるぎ',
+    category: '片手剣',
+    materialType: '通常',
+    activeIndices: [0, 2, 4],
+    minGreenValues: [45, 50, 40],
+    maxGreenValues: [55, 62, 48],
+    maxError3: 2,
+    maxError2: 8,
+    maxError1: 13,
+    maxError0: 23
+  },
+  {
+    id: '10047',
+    name: 'はやぶさの剣改',
+    category: '片手剣',
+    materialType: '倍半地金',
+    activeIndices: [0, 2, 4],
+    minGreenValues: [341, 294, 245],
+    maxGreenValues: [347, 304, 255],
+    maxError3: 2,
+    maxError2: 8,
+    maxError1: 13,
+    maxError0: 23
+  }
+];
+
 export default function App() {
   // --- Theme State ---
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -140,8 +182,24 @@ export default function App() {
     setNewItemError2(category.errors[1]);
     setNewItemError1(category.errors[2]);
     setNewItemError0(category.errors[3]);
-    setNewItemMinGreen({});
-    setNewItemMaxGreen({});
+    
+    // 既存の同カテゴリのアイテムを検索し、その緑ゲージ値をデフォルト入力する
+    const firstMatchingItem = itemsList.find(it => it.category === categoryName);
+    const defaultMin: Record<number, number> = {};
+    const defaultMax: Record<number, number> = {};
+    if (firstMatchingItem) {
+      category.activeIndices.forEach((idx, i) => {
+        defaultMin[idx] = firstMatchingItem.minGreenValues[i] || 20;
+        defaultMax[idx] = firstMatchingItem.maxGreenValues[i] || 30;
+      });
+    } else {
+      category.activeIndices.forEach(idx => {
+        defaultMin[idx] = 20;
+        defaultMax[idx] = 30;
+      });
+    }
+    setNewItemMinGreen(defaultMin);
+    setNewItemMaxGreen(defaultMax);
   };
 
   // --- Game Engine Instance ---
@@ -202,7 +260,16 @@ export default function App() {
           setForgeState(state);
         }
       } catch (err) {
-        console.error('Failed to load items:', err);
+        console.error('Failed to load items from API, falling back to default items:', err);
+        setItemsList(DEFAULT_FALLBACK_ITEMS);
+        if (DEFAULT_FALLBACK_ITEMS.length > 0) {
+          setSelectedItemId(DEFAULT_FALLBACK_ITEMS[0].id);
+          const engine = new ForgeCoreEngine();
+          engineRef.current = engine;
+          const seedVal = customSeed.trim() || Math.random().toString(36).substring(2);
+          const state = engine.reset(DEFAULT_FALLBACK_ITEMS[0].id, selectedHammerId, selectedQuality, seedVal, selectedLevel, DEFAULT_FALLBACK_ITEMS);
+          setForgeState(state);
+        }
       }
     };
     fetchItems();
