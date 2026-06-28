@@ -51,3 +51,5 @@ masterdata/
 # C++ Backend and ONNX Runtime
 cpp_backend/build/
 cpp_backend/third_party/
+*.onnx
+cpp_backend/models/

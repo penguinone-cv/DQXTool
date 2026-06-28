@@ -6,6 +6,7 @@
 #include <random>
 #include <string>
 #include <sstream>
+#include <memory>
 
 int main(int argc, char* argv[]) {
     try {
@@ -43,13 +44,40 @@ int main(int argc, char* argv[]) {
             // ==================================================================
             // CLIモード: 標準入力から1行（74個のfloat）読み込むたびに推論し、JSONで出力 (常駐対話モード)
             // ==================================================================
-            PolicyValuePredictor predictor(model_path);
+            std::unique_ptr<PolicyValuePredictor> predictor;
+            try {
+                predictor = std::make_unique<PolicyValuePredictor>(model_path);
+            } catch (const std::exception& e) {
+                std::cerr << "[WARNING] Failed to load initial model: " << e.what() << std::endl;
+            }
             
             std::string line;
             // 標準入力から行単位でEOFまで待ち受ける
             while (std::getline(std::cin, line)) {
                 if (line.empty()) continue;
                 if (line == "exit" || line == "quit") break;
+
+                // オンデマンド・モデル動的ロードコマンドの処理
+                if (line.rfind("load ", 0) == 0) {
+                    std::string new_path_str = line.substr(5);
+#if defined(_WIN32)
+                    std::wstring new_model_path(new_path_str.begin(), new_path_str.end());
+#else
+                    std::string new_model_path = new_path_str;
+#endif
+                    try {
+                        predictor = std::make_unique<PolicyValuePredictor>(new_model_path);
+                        std::cout << "{\"status\":\"loaded\"}" << std::endl;
+                    } catch (const std::exception& e) {
+                        std::cout << "{\"error\":\"Failed to load model: " << e.what() << "\"}" << std::endl;
+                    }
+                    continue;
+                }
+
+                if (!predictor) {
+                    std::cout << "{\"error\":\"No model is currently loaded. Send 'load <model_path>' first.\"}" << std::endl;
+                    continue;
+                }
 
                 std::stringstream ss(line);
                 std::vector<float> input_features;

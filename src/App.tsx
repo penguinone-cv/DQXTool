@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { items, hammers, skills, levelFocusMap } from './data/masterData';
+import { hammers, skills, levelFocusMap, categories } from './data/masterData';
 import { ForgeCoreEngine } from './utils/forgeCoreEngine';
 import type { ForgeState } from './utils/forgeCoreEngine';
 
@@ -21,8 +21,9 @@ const SEARCH_MESSAGES = [
   'バタフライエフェクトを考慮した結果、処理を3秒遅らせることにしました...',
   'ハムスターが『有給をくれ』とデモを起こしています...',
   'ハムスターたちが、誰が一番えらいかで揉めています...',
-  '進捗バーが『もっとゆっくり歩きたい』と言うので、付き合っています...'
 ];
+
+
 
 export default function App() {
   // --- Theme State ---
@@ -42,11 +43,106 @@ export default function App() {
   const [showHelp, setShowHelp] = useState<boolean>(false);
 
   // --- Game Setup State ---
-  const [selectedItemId, setSelectedItemId] = useState<string>(items[0].id);
+  const [itemsList, setItemsList] = useState<any[]>([]);
+  const [selectedItemId, setSelectedItemId] = useState<string>('');
   const [selectedHammerId, setSelectedHammerId] = useState<string>(hammers[5].id); // Default: 奇跡の鍛冶ハンマー
   const [selectedQuality, setSelectedQuality] = useState<number>(3); // Default: ★3
   const [selectedLevel, setSelectedLevel] = useState<number>(80); // Default: レベル80
   const [customSeed, setCustomSeed] = useState<string>('');
+
+  // --- Add Item Modal State & Handlers ---
+  const [showAddItem, setShowAddItem] = useState<boolean>(false);
+  const [newItemName, setNewItemName] = useState('');
+  const [newItemCategory, setNewItemCategory] = useState('片手剣');
+  const [newItemMaterialType, setNewItemMaterialType] = useState('通常');
+  const [newItemActiveIndices, setNewItemActiveIndices] = useState<number[]>([]);
+  const [newItemMinGreen, setNewItemMinGreen] = useState<Record<number, number>>({});
+  const [newItemMaxGreen, setNewItemMaxGreen] = useState<Record<number, number>>({});
+  const [newItemError3, setNewItemError3] = useState(2);
+  const [newItemError2, setNewItemError2] = useState(8);
+  const [newItemError1, setNewItemError1] = useState(13);
+  const [newItemError0, setNewItemError0] = useState(23);
+
+  const handleAddItemSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newItemName.trim()) {
+      alert("アイテム名を入力してください");
+      return;
+    }
+    if (newItemActiveIndices.length === 0) {
+      alert("活性マスを1箇所以上選択してください");
+      return;
+    }
+
+    const sortedIndices = [...newItemActiveIndices].sort((a, b) => a - b);
+    const minGreenValues: number[] = [];
+    const maxGreenValues: number[] = [];
+
+    for (const idx of sortedIndices) {
+      const minVal = newItemMinGreen[idx] || 0;
+      const maxVal = newItemMaxGreen[idx] || 0;
+      if (minVal <= 0 || maxVal <= 0 || minVal > maxVal) {
+        alert(`マス ${idx} の緑ゲージ目標値が正しくありません (最小: ${minVal}, 最大: ${maxVal})`);
+        return;
+      }
+      minGreenValues.push(minVal);
+      maxGreenValues.push(maxVal);
+    }
+
+    const selectedCategory = categories.find(c => c.name === newItemCategory) || categories[categories.length - 1];
+    const payload = {
+      name: newItemName.trim(),
+      categoryId: selectedCategory.id,
+      materialType: newItemMaterialType,
+      minGreenValues,
+      maxGreenValues
+    };
+
+    try {
+      const host = typeof window !== 'undefined' && window.location ? window.location.origin : 'http://localhost:3001';
+      const pathParts = window.location.pathname.split('/');
+      const subDir = pathParts.find(p => p.toLowerCase() === 'dqxtool') ? '/dqxtool' : '';
+      const response = await fetch(`${host}${subDir}/api/items`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || '追加に失敗しました');
+      }
+
+      const resData = await response.json();
+      const createdItem = resData.item;
+
+      // 即時反映
+      setItemsList(prev => [...prev, createdItem]);
+      setSelectedItemId(createdItem.id);
+
+      // リセット
+      setNewItemName('');
+      setNewItemActiveIndices([]);
+      setNewItemMinGreen({});
+      setNewItemMaxGreen({});
+      setShowAddItem(false);
+
+      alert(`新規アイテム「${createdItem.name}」（ID: ${createdItem.id}）を追加しました！`);
+    } catch (err: any) {
+      alert("アイテム追加エラー: " + err.message);
+    }
+  };
+
+  const applyCategoryPreset = (categoryName: string) => {
+    const category = categories.find(c => c.name === categoryName) || categories[categories.length - 1];
+    setNewItemActiveIndices(category.activeIndices);
+    setNewItemError3(category.errors[0]);
+    setNewItemError2(category.errors[1]);
+    setNewItemError1(category.errors[2]);
+    setNewItemError0(category.errors[3]);
+    setNewItemMinGreen({});
+    setNewItemMaxGreen({});
+  };
 
   // --- Game Engine Instance ---
   const engineRef = useRef<ForgeCoreEngine | null>(null);
@@ -69,6 +165,7 @@ export default function App() {
 
   // Initialize/reset engine
   const handleReset = () => {
+    if (!selectedItemId) return;
     const engine = new ForgeCoreEngine();
     engineRef.current = engine;
 
@@ -84,9 +181,31 @@ export default function App() {
     setIsSearching(false);
   };
 
-  // Run initial setup on mount
+  // Fetch items dynamic API on mount
   useEffect(() => {
-    handleReset();
+    const fetchItems = async () => {
+      try {
+        const host = typeof window !== 'undefined' && window.location ? window.location.origin : 'http://localhost:3001';
+        const pathParts = window.location.pathname.split('/');
+        const subDir = pathParts.find(p => p.toLowerCase() === 'dqxtool') ? '/dqxtool' : '';
+        const response = await fetch(`${host}${subDir}/api/items`);
+        if (!response.ok) throw new Error('Failed to fetch items');
+        const loadedItems = await response.json();
+        setItemsList(loadedItems);
+        if (loadedItems.length > 0) {
+          setSelectedItemId(loadedItems[0].id);
+          
+          const engine = new ForgeCoreEngine();
+          engineRef.current = engine;
+          const seedVal = customSeed.trim() || Math.random().toString(36).substring(2);
+          const state = engine.reset(loadedItems[0].id, selectedHammerId, selectedQuality, seedVal, selectedLevel);
+          setForgeState(state);
+        }
+      } catch (err) {
+        console.error('Failed to load items:', err);
+      }
+    };
+    fetchItems();
   }, []);
 
   // Cleanup Web Worker on unmount
@@ -600,13 +719,25 @@ export default function App() {
             <div className="space-y-4">
               {/* Item Selection */}
               <div>
-                <label className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">作成するアイテム</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">作成するアイテム</label>
+                  <button
+                    onClick={() => {
+                      setShowAddItem(true);
+                      applyCategoryPreset('片手剣');
+                    }}
+                    className="text-[11px] text-indigo-400 hover:text-indigo-300 font-bold flex items-center space-x-1 cursor-pointer transition-all hover:scale-105 active:scale-95 bg-transparent border-none"
+                    type="button"
+                  >
+                    <span>＋ 新規追加</span>
+                  </button>
+                </div>
                 <select
                   value={selectedItemId}
                   onChange={(e) => setSelectedItemId(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 px-3 mt-1.5 text-slate-200 text-sm focus:outline-none focus:border-indigo-500 cursor-pointer font-medium"
                 >
-                  {items.map(item => (
+                  {itemsList.map(item => (
                     <option key={item.id} value={item.id}>
                       {item.name} ({item.category} / {item.materialType})
                     </option>
@@ -1265,6 +1396,232 @@ export default function App() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Item Modal Window */}
+      {showAddItem && (
+        <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="glass-panel rounded-3xl p-6 md:p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-indigo-550/20 relative animate-fade-in text-slate-200 text-left">
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setShowAddItem(false);
+                setNewItemActiveIndices([]);
+                setNewItemMinGreen({});
+                setNewItemMaxGreen({});
+              }}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white transition-all cursor-pointer h-8 w-8 rounded-full bg-slate-900/60 flex items-center justify-center border border-slate-800 hover:border-slate-750"
+              type="button"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Form */}
+            <form onSubmit={handleAddItemSubmit} className="space-y-4">
+              <div className="flex items-center space-x-3 border-b border-slate-800 pb-3">
+                <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/30">
+                  <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-white font-sans">新規アイテムの追加</h3>
+              </div>
+
+              {/* Name */}
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">アイテム名</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="例: はやぶさの剣改"
+                  value={newItemName}
+                  onChange={(e) => setNewItemName(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-850 rounded-xl py-2 px-3 text-slate-200 text-sm focus:outline-none focus:border-indigo-500 font-medium"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Category */}
+                <div>
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">カテゴリ</label>
+                  <select
+                    value={newItemCategory}
+                    onChange={(e) => {
+                      const newCat = e.target.value;
+                      setNewItemCategory(newCat);
+                      applyCategoryPreset(newCat);
+                    }}
+                    className="w-full bg-slate-950 border border-slate-850 rounded-xl py-2 px-3 text-slate-200 text-sm focus:outline-none focus:border-indigo-500 cursor-pointer font-medium"
+                  >
+                    {['片手剣', '両手剣', '短剣', 'ヤリ', 'オノ', 'ツメ', 'ムチ', 'ハンマー', 'ブーメラン', '鎌', '盾', 'あたま', 'からだ上', 'からだ下', 'うで', 'あし', 'その他'].map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Material Type */}
+                <div>
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">地金特性</label>
+                  <select
+                    value={newItemMaterialType}
+                    onChange={(e) => setNewItemMaterialType(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-850 rounded-xl py-2 px-3 text-slate-200 text-sm focus:outline-none focus:border-indigo-500 cursor-pointer font-medium"
+                  >
+                    {['通常', '戻り地金', '倍半地金', '集中変化地金', '光地金'].map(mat => (
+                      <option key={mat} value={mat}>{mat}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Active Indices Selector */}
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">活性マス (配置をチェック)</label>
+                <div className="grid grid-cols-4 gap-2 mt-1.5">
+                  {[0, 1, 2, 3, 4, 5, 6, 7].map(idx => {
+                    const isChecked = newItemActiveIndices.includes(idx);
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          if (isChecked) {
+                            setNewItemActiveIndices(prev => prev.filter(i => i !== idx));
+                          } else {
+                            setNewItemActiveIndices(prev => [...prev, idx]);
+                          }
+                        }}
+                        className={`h-11 rounded-lg border font-bold text-xs flex flex-col items-center justify-center transition-all cursor-pointer ${isChecked
+                          ? 'bg-indigo-600 border-indigo-400 text-white font-extrabold shadow shadow-indigo-500/20'
+                          : 'bg-slate-950 border-slate-850 text-slate-400 hover:border-slate-750'
+                          }`}
+                      >
+                        <span>マス {idx}</span>
+                        <span className="text-[8px] text-slate-500 font-normal">
+                          {idx < 2 ? '上段' : idx < 4 ? '中上段' : idx < 6 ? '中下段' : '下段'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Dynamic Min / Max Inputs for Active Cells */}
+              {newItemActiveIndices.length > 0 && (
+                <div className="mt-3 space-y-2.5 bg-slate-950/40 p-3.5 rounded-xl border border-slate-900 max-h-[22vh] overflow-y-auto">
+                  <label className="text-xs font-bold text-slate-400 block mb-1">緑ゲージ成功範囲</label>
+                  {[...newItemActiveIndices].sort((a, b) => a - b).map(idx => (
+                    <div key={idx} className="flex items-center space-x-3 text-xs">
+                      <span className="w-16 font-bold text-indigo-400 font-mono">マス {idx}:</span>
+                      <div className="flex items-center space-x-2 flex-1">
+                        <input
+                          type="number"
+                          placeholder="最小値"
+                          required
+                          min="1"
+                          max="1000"
+                          value={newItemMinGreen[idx] || ''}
+                          onChange={(e) => setNewItemMinGreen(prev => ({ ...prev, [idx]: Number(e.target.value) || 0 }))}
+                          className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1 px-2.5 text-center text-slate-200 focus:outline-none focus:border-indigo-500 font-mono text-xs"
+                        />
+                        <span className="text-slate-650">〜</span>
+                        <input
+                          type="number"
+                          placeholder="最大値"
+                          required
+                          min="1"
+                          max="1000"
+                          value={newItemMaxGreen[idx] || ''}
+                          onChange={(e) => setNewItemMaxGreen(prev => ({ ...prev, [idx]: Number(e.target.value) || 0 }))}
+                          className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1 px-2.5 text-center text-slate-200 focus:outline-none focus:border-indigo-500 font-mono text-xs"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Errors limits */}
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">各品質の許容誤差 (目標からの絶対誤差合計)</label>
+                <div className="grid grid-cols-4 gap-2 mt-1">
+                  <div>
+                    <label className="text-[10px] text-amber-500 font-bold block text-center">★3</label>
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      max="100"
+                      value={newItemError3}
+                      onChange={(e) => setNewItemError3(Number(e.target.value) || 0)}
+                      className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1 px-2 text-center text-slate-200 focus:outline-none focus:border-indigo-500 font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-350 font-bold block text-center">★2</label>
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      max="100"
+                      value={newItemError2}
+                      onChange={(e) => setNewItemError2(Number(e.target.value) || 0)}
+                      className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1 px-2 text-center text-slate-200 focus:outline-none focus:border-indigo-500 font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-orange-450 font-bold block text-center">★1</label>
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      max="100"
+                      value={newItemError1}
+                      onChange={(e) => setNewItemError1(Number(e.target.value) || 0)}
+                      className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1 px-2 text-center text-slate-200 focus:outline-none focus:border-indigo-500 font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-600 font-bold block text-center">★0</label>
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      max="100"
+                      value={newItemError0}
+                      onChange={(e) => setNewItemError0(Number(e.target.value) || 0)}
+                      className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1 px-2 text-center text-slate-200 focus:outline-none focus:border-indigo-500 font-mono text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex items-center space-x-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddItem(false);
+                    setNewItemActiveIndices([]);
+                    setNewItemMinGreen({});
+                    setNewItemMaxGreen({});
+                  }}
+                  className="flex-1 bg-slate-950 hover:bg-slate-900 border border-slate-850 text-slate-400 font-bold py-2.5 px-6 rounded-xl transition-all cursor-pointer text-xs"
+                >
+                  キャンセル
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-gradient-to-r from-indigo-600 to-violet-650 hover:from-indigo-500 hover:to-violet-550 text-white font-bold py-2.5 px-6 rounded-xl transition-all cursor-pointer text-xs shadow-lg hover:shadow-indigo-550/20"
+                >
+                  追加する
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

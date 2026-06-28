@@ -1,4 +1,5 @@
-import { items, hammers, skills, levelFocusMap } from '../data/masterData';
+import { hammers, skills, levelFocusMap } from '../data/masterData';
+import { getGlobalItems } from './itemLoader';
 import type { ItemData, HammerData } from '../data/masterData';
 
 export interface ForgeCell {
@@ -83,7 +84,8 @@ export class ForgeCoreEngine implements IForgeCoreEngine {
   private hammerQuality!: number;
 
   reset(itemName: string, hammerName: string, hammerQuality: number, seed?: string, characterLevel?: number): ForgeState {
-    const matchedItem = items.find(i => i.name === itemName || i.id === itemName);
+    const itemsList = getGlobalItems();
+    const matchedItem = itemsList.find(i => i.name === itemName || i.id === itemName);
     if (!matchedItem) {
       throw new Error(`Item not found: ${itemName}`);
     }
@@ -191,8 +193,9 @@ export class ForgeCoreEngine implements IForgeCoreEngine {
     this.prng = new PRNG(state.seed);
     
     // Resolve matching item/hammer databases
-    const matchedItem = items.find(i => i.materialType === state.materialType);
-    this.activeItem = matchedItem || items[0];
+    const itemsList = getGlobalItems();
+    const matchedItem = itemsList.find(i => i.materialType === state.materialType);
+    this.activeItem = matchedItem || itemsList[0];
     const levelFocus = levelFocusMap[actualLevel] || 207;
     this.activeHammer = hammers.find(h => levelFocus + h.focusBonus === state.maxFocus || levelFocus + h.focusBonus + 30 === state.maxFocus) || hammers[5];
     this.hammerQuality = 3; // Default fallback

@@ -1,5 +1,5 @@
 import type { ForgeState } from './forgeCoreEngine';
-import { hammers, levelFocusMap, items } from '../data/masterData';
+import { hammers, levelFocusMap } from '../data/masterData';
 import type { ItemData } from '../data/masterData';
 
 // stateからハンマーの種類と品質を推定するヘルパー
@@ -35,10 +35,10 @@ export function estimateHammerInfo(state: ForgeState): { hammerId: string; hamme
 }
 
 // stateからアイテムデータを推定する逆引き関数 (緑ゲージ値も照合して一意特定)
-export function estimateItem(state: ForgeState): ItemData | null {
+export function estimateItem(state: ForgeState, itemsList: ItemData[] = []): ItemData | null {
   const activeCells = state.cells.filter(c => c.isActive);
   
-  for (const item of items) {
+  for (const item of itemsList) {
     if (item.materialType !== state.materialType) continue;
     if (item.activeIndices.length !== activeCells.length) continue;
     
@@ -64,11 +64,11 @@ export function estimateItem(state: ForgeState): ItemData | null {
   }
   
   // 完全一致が無い場合のフォールバック（地金タイプが一致する最初のアイテム）
-  return items.find(item => item.materialType === state.materialType) || null;
+  return itemsList.find(item => item.materialType === state.materialType) || null;
 }
 
 // 74次元特徴量ベクトルの抽出
-export function extractFeatures(state: ForgeState, hammerQuality: number = 3): number[] {
+export function extractFeatures(state: ForgeState, hammerQuality: number = 3, itemsList: ItemData[] = []): number[] {
   const features = new Array<number>(74).fill(0.0);
 
   // 1. 盤面セル特徴量 (0 〜 55: 計 56次元)
@@ -101,7 +101,7 @@ export function extractFeatures(state: ForgeState, hammerQuality: number = 3): n
   features[61] = hammerQuality / 3.0;
 
   // アイテム情報からの許容誤差の取得
-  const matchedItem = estimateItem(state);
+  const matchedItem = estimateItem(state, itemsList);
   const maxError3 = matchedItem ? matchedItem.maxError3 : 2;
   const maxError2 = matchedItem ? matchedItem.maxError2 : 8;
   const maxError1 = matchedItem ? matchedItem.maxError1 : 13;

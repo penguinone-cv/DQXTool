@@ -7,6 +7,7 @@ import { ForgeCoreEngine } from './forgeCoreEngine';
 import { cloneForgeState, getPossibleMovesForSolver, evaluateStateScore } from './solverUtils';
 import { extractFeatures } from './featureExtractor';
 import { skills } from '../data/masterData';
+import type { ItemData } from '../data/masterData';
 
 // 常駐プロセスとしてC++推論エンジンと対話するクライアント
 export class InferenceClient {
@@ -90,14 +91,27 @@ export class InferenceClient {
     });
   }
 
+  // モデルの動的ロード切り替え
+  async loadModel(modelPath: string): Promise<void> {
+    if (!this.child) return;
+
+    return new Promise((resolve, reject) => {
+      this.pendingRequests.push({
+        resolve: () => resolve(),
+        reject: (err) => reject(err)
+      });
+      // Windowsパスのバックスラッシュをスラッシュに正規化してコマンド送信
+      const normalizedPath = modelPath.replace(/\\/g, '/');
+      this.child!.stdin.write(`load ${normalizedPath}\n`);
+    });
+  }
+
   predict(features: number[]): Promise<{ policy: number[], value: number }> {
     if (!this.child) {
       // ローカル開発環境用のモック推論フォールバック
       const mockPolicy = new Array<number>(160).fill(0.0).map(() => Math.random() * 2.0 - 1.0);
-      // 「しあげる」のインデックス16のロジットを高めにする
-      mockPolicy[16 * 8] = 5.0; 
+      mockPolicy[16 * 8] = 5.0; // 「しあげる」のインデックス16のロジットを高めにする
       const mockValue = 0.8;
-      
       return Promise.resolve({ policy: mockPolicy, value: mockValue });
     }
 
@@ -152,17 +166,17 @@ export class MCTSNode {
 // AlphaZero風 MCTS 探索エンジン
 export class MctsSearch {
   private client: InferenceClient;
-  private cPuct = 0.8; // 探索度を調整する PUCT 定数 (シミュレーション2000回規模に最適化)
+  private cPuct = 0.8; // 探索度を調整する PUCT 定数
 
   constructor(client: InferenceClient) {
     this.client = client;
   }
 
-  async search(initialState: ForgeState, numSimulations = 100): Promise<any[]> {
+  async search(initialState: ForgeState, numSimulations = 100, useModel = true, itemsList: ItemData[] = []): Promise<any[]> {
     const root = new MCTSNode(cloneForgeState(initialState));
     
     // ルートノードの初期評価・展開
-    await this.expandAndEvaluate(root);
+    await this.expandAndEvaluate(root, useModel, itemsList);
 
     for (let sim = 0; sim < numSimulations; sim++) {
       let node = root;
@@ -175,7 +189,7 @@ export class MctsSearch {
       // 2. Expansion & Evaluation
       let value = 0.0;
       if (!node.state.isDone) {
-        value = await this.expandAndEvaluate(node);
+        value = await this.expandAndEvaluate(node, useModel, itemsList);
       } else {
         value = this.evaluateTerminalState(node.state);
       }
@@ -230,38 +244,66 @@ export class MctsSearch {
     return bestChild;
   }
 
-  private async expandAndEvaluate(node: MCTSNode): Promise<number> {
-    const features = extractFeatures(node.state);
-    const { policy, value } = await this.client.predict(features);
-
+  private async expandAndEvaluate(node: MCTSNode, useModel = true, itemsList: ItemData[] = []): Promise<number> {
     const possibleMoves = getPossibleMovesForSolver(node.state);
     const engine = new ForgeCoreEngine();
 
-    let totalWeight = 0;
+    // 簡易物理スコアの計算 (共通)
+    const rawScore = evaluateStateScore(node.state);
+    const activeCount = node.state.cells.filter(c => c.isActive).length;
+    const maxPossible = activeCount * 250; // 最大250点/マスと仮定
+    const heuristicVal = Math.min(1.0, Math.max(0.0, (rawScore + 300) / (maxPossible + 300)));
+
+    let value = 0.0;
     const childCandidates: { move: { actionName: string; targets: number[] }; prob: number }[] = [];
 
-    // 有効手に対応する Policy の事前確率を計算
-    for (const move of possibleMoves) {
-      let skillIdx = skills.findIndex(s => s.name === move.actionName);
-      if (move.actionName === 'しあげる') {
-        skillIdx = 16;
+    if (useModel) {
+      // 1. モデルあり探索 (AlphaZero風)
+      const features = extractFeatures(node.state, 3, itemsList);
+      const res = await this.client.predict(features);
+      const policy = res.policy;
+      const modelValue = res.value;
+
+      let totalWeight = 0;
+      for (const move of possibleMoves) {
+        let skillIdx = skills.findIndex(s => s.name === move.actionName);
+        if (move.actionName === 'しあげる') {
+          skillIdx = 16;
+        }
+
+        const targetIdx = move.targets.length > 0 ? move.targets[0] : 0;
+        let logit = -9.0;
+        if (skillIdx !== -1 && skillIdx < 20) {
+          logit = policy[skillIdx * 8 + targetIdx];
+        }
+
+        const prob = Math.exp(logit);
+        totalWeight += prob;
+        childCandidates.push({ move, prob });
       }
 
-      const targetIdx = move.targets.length > 0 ? move.targets[0] : 0;
-      let logit = -9.0;
-      if (skillIdx !== -1 && skillIdx < 20) {
-        logit = policy[skillIdx * 8 + targetIdx];
+      // 確率の正規化
+      for (const candidate of childCandidates) {
+        candidate.prob = totalWeight > 0 ? candidate.prob / totalWeight : 1.0 / childCandidates.length;
       }
 
-      const prob = Math.exp(logit);
-      totalWeight += prob;
-      childCandidates.push({ move, prob });
+      const modelVal = (modelValue + 1.0) / 2.0;
+      const blendBeta = 0.5;
+      value = blendBeta * modelVal + (1.0 - blendBeta) * heuristicVal;
+    } else {
+      // 2. モデルなしの純粋MCTS (ヒューリスティック評価ベース)
+      // 事前確率はすべて均等に割り当てる
+      const uniformProb = 1.0 / possibleMoves.length;
+      for (const move of possibleMoves) {
+        childCandidates.push({ move, prob: uniformProb });
+      }
+
+      // 期待値には物理スコアをそのまま使用
+      value = heuristicVal;
     }
 
     // 子ノードの展開
     for (const candidate of childCandidates) {
-      const normalizedProb = totalWeight > 0 ? candidate.prob / totalWeight : 1.0 / childCandidates.length;
-
       const nextState = cloneForgeState(node.state);
       engine.loadState(nextState);
       
@@ -272,26 +314,13 @@ export class MctsSearch {
         } else {
           testState = engine.step(candidate.move.actionName, candidate.move.targets);
         }
-        node.children.push(new MCTSNode(testState, node, candidate.move, normalizedProb));
+        node.children.push(new MCTSNode(testState, node, candidate.move, candidate.prob));
       } catch (err) {
         // 無効なアクションは追加しない
       }
     }
 
-    // 価値予測（-1.0〜1.0）を 0.0〜1.0 の価値に変換
-    const modelVal = (value + 1.0) / 2.0;
-
-    // ルールベースのヒューリスティック評価（緑ゲージ侵入やズレペナルティ）をブレンド
-    // これにより、すでに緑ゲージにあるマスをさらに叩く行為を確実にペナルティとして検知します
-    const rawScore = evaluateStateScore(node.state);
-    const activeCount = node.state.cells.filter(c => c.isActive).length;
-    const maxPossible = activeCount * 250; // 最大250点/マスと仮定
-    // -300 〜 maxPossible を 0.0 〜 1.0 に正規化
-    const heuristicVal = Math.min(1.0, Math.max(0.0, (rawScore + 300) / (maxPossible + 300)));
-
-    // ブレンド比率 (モデル 50%, ヒューリスティック 50%)
-    const blendBeta = 0.5;
-    return blendBeta * modelVal + (1.0 - blendBeta) * heuristicVal;
+    return value;
   }
 
   private evaluateTerminalState(state: ForgeState): number {

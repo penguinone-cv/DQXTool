@@ -3,6 +3,7 @@ import { ModelSolver } from '../utils/solver';
 import type { ForgeState } from '../utils/forgeCoreEngine';
 import { getPossibleMovesForSolver } from '../utils/solverUtils';
 
+import { loadAndJoinItems } from '../utils/itemLoader';
 
 function assertTrue(condition: boolean, message: string) {
   if (!condition) {
@@ -13,6 +14,17 @@ function assertTrue(condition: boolean, message: string) {
 
 async function runSolverTests() {
   console.log('--- Starting ModelSolver TDD Unit Tests ---');
+
+  // 新機能: itemLoaderによるCSV正規化結合のテスト
+  console.log('[Test] ItemLoader and normalized categories JOIN');
+  const items = await loadAndJoinItems();
+  assertTrue(items.length > 0, 'Loaded items should not be empty');
+  const firstItem = items[0];
+  assertTrue(!!firstItem.id, 'Item should have an ID');
+  assertTrue(!!firstItem.category, 'Item should have a category name mapped');
+  assertTrue(firstItem.activeIndices.length > 0, 'Item should have inherited activeIndices from category');
+  assertTrue(firstItem.maxError3 !== undefined, 'Item should have inherited maxError3 from category');
+
 
   const engine = new ForgeCoreEngine();
   const state: ForgeState = engine.reset('てつのつるぎ', '鉄の鍛冶ハンマー', 3, 'tddseed123');
