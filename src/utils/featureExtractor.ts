@@ -34,17 +34,33 @@ export function estimateHammerInfo(state: ForgeState): { hammerId: string; hamme
   return { hammerId: bestHammerId, hammerQuality: 3 };
 }
 
-// stateからアイテムデータを推定する逆引き関数
+// stateからアイテムデータを推定する逆引き関数 (緑ゲージ値も照合して一意特定)
 export function estimateItem(state: ForgeState): ItemData | null {
-  const activeIdxs = state.cells.filter(c => c.isActive).map(c => c.index);
+  const activeCells = state.cells.filter(c => c.isActive);
   
-  // マテリアルタイプと活性マス一覧が一致するアイテムを探す
   for (const item of items) {
     if (item.materialType !== state.materialType) continue;
-    if (item.activeIndices.length !== activeIdxs.length) continue;
+    if (item.activeIndices.length !== activeCells.length) continue;
     
-    const match = item.activeIndices.every(idx => activeIdxs.includes(idx));
-    if (match) return item;
+    // 各活性セルのインデックスおよび緑ゲージの最小・最大値が一致するかチェック
+    let isMatch = true;
+    for (let i = 0; i < item.activeIndices.length; i++) {
+      const idx = item.activeIndices[i];
+      const stateCell = state.cells[idx];
+      
+      if (!stateCell || !stateCell.isActive) {
+        isMatch = false;
+        break;
+      }
+      
+      if (stateCell.minGreenValue !== item.minGreenValues[i] ||
+          stateCell.maxGreenValue !== item.maxGreenValues[i]) {
+        isMatch = false;
+        break;
+      }
+    }
+    
+    if (isMatch) return item;
   }
   
   // 完全一致が無い場合のフォールバック（地金タイプが一致する最初のアイテム）
