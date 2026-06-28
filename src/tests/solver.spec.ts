@@ -3,12 +3,6 @@ import { ModelSolver } from '../utils/solver';
 import type { ForgeState } from '../utils/forgeCoreEngine';
 import { getPossibleMovesForSolver } from '../utils/solverUtils';
 
-function assertEquals(actual: any, expected: any, message: string) {
-  if (actual !== expected) {
-    throw new Error(`FAIL: ${message}. Expected ${expected}, got ${actual}`);
-  }
-  console.log(`PASS: ${message}`);
-}
 
 function assertTrue(condition: boolean, message: string) {
   if (!condition) {

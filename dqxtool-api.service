@@ -4,10 +4,11 @@ After=network.target
 
 [Service]
 Type=simple
-# 本番環境の実行ユーザー名に変更してください (例: ubuntu, www-data, node)
+# 【重要】本番サーバー上に存在する正しいユーザー名に書き換えてください。
+# (現在操作しているユーザー名は Linux 上で `whoami` コマンドを実行することで確認できます)
 User=ubuntu
 
-# Gitリポジトリが配置されている元のプロジェクトルートを指定してください
+# 【重要】Gitリポジトリ（DQXTool）が配置されている実際の絶対パスを指定してください
 WorkingDirectory=/home/ubuntu/DQXTool
 
 # npm の絶対パスを指定してください (which npm で確認できます)
