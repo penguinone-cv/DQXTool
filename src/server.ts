@@ -157,7 +157,7 @@ app.get('/api/actions', (_req: express.Request, res: express.Response): any => {
 });
 
 // POST /api/recommend : ONNXモデル推論に基づき、推奨アクションを返すエンドポイント
-app.post('/api/recommend', async (req: express.Request, res: express.Response): Promise<any> => {
+app.post(['/api/recommend', '/DQXTool/api/recommend'], async (req: express.Request, res: express.Response): Promise<any> => {
   try {
     const { state } = req.body;
     if (!state) {
